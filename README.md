@@ -1,7 +1,5 @@
 # Project Uday - Dynamic Credit Scoring & Guidance System
 
-## 🏆 Award-Winning Hackathon Project
-
 **Project Uday** is a revolutionary AI-powered credit scoring system that provides dynamic, real-time credit assessments and personalized financial guidance for underserved populations.
 
 ## 🌟 Key Innovations
@@ -281,4 +279,4 @@ The system includes sophisticated ML capabilities:
 
 ---
 
-**🏆 This is not just a credit scoring system - it's a complete financial empowerment platform designed to win hackathons and change lives!**
+**🏆 This is not just a credit scoring system - it's a complete financial empowerment platform designed to change lives!**
