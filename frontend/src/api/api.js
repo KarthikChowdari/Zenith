@@ -53,7 +53,7 @@ api.interceptors.response.use(
 
 /**
  * Get beneficiary information by ID
- * @param {number} beneficiaryId - The ID of the beneficiary
+ * @param {string} beneficiaryId - The UUID of the beneficiary
  * @returns {Promise<Object>} Beneficiary data with score and risk category
  */
 export const getBeneficiary = async (beneficiaryId) => {
@@ -66,12 +66,14 @@ export const getBeneficiary = async (beneficiaryId) => {
 };
 
 /**
- * Get list of all beneficiaries
- * @returns {Promise<Object>} List of all beneficiaries with basic info
+ * Get list of all beneficiaries with filtering
+ * @param {string} tenantId - Optional tenant ID for filtering
+ * @returns {Promise<Object>} List of all beneficiaries with enhanced data
  */
-export const getAllBeneficiaries = async () => {
+export const getAllBeneficiaries = async (tenantId = null) => {
   try {
-    const response = await api.get('/beneficiaries');
+    const params = tenantId ? { tenant_id: tenantId } : {};
+    const response = await api.get('/beneficiaries', { params });
     return response.data;
   } catch (error) {
     throw new Error(`Failed to fetch beneficiaries: ${error.message}`);
@@ -79,10 +81,24 @@ export const getAllBeneficiaries = async () => {
 };
 
 /**
+ * Get a specific beneficiary by ID
+ * @param {string} beneficiaryId - The UUID of the beneficiary
+ * @returns {Promise<Object>} Beneficiary data
+ */
+export const getBeneficiaryById = async (beneficiaryId) => {
+  try {
+    const response = await api.get(`/beneficiaries/${beneficiaryId}`);
+    return response.data;
+  } catch (error) {
+    throw new Error(`Failed to fetch beneficiary ${beneficiaryId}: ${error.message}`);
+  }
+};
+
+/**
  * Update beneficiary data and retrain model
- * @param {number} beneficiaryId - The ID of the beneficiary
+ * @param {string} beneficiaryId - The UUID of the beneficiary
  * @param {Object} newData - New data to update
- * @returns {Promise<Object>} Update status
+ * @returns {Promise<Object>} Update status with new score
  */
 export const updateBeneficiary = async (beneficiaryId, newData) => {
   try {
@@ -93,6 +109,37 @@ export const updateBeneficiary = async (beneficiaryId, newData) => {
     return response.data;
   } catch (error) {
     throw new Error(`Failed to update beneficiary ${beneficiaryId}: ${error.message}`);
+  }
+};
+
+/**
+ * Get score history for a beneficiary
+ * @param {string} beneficiaryId - The UUID of the beneficiary
+ * @param {number} limit - Number of records to fetch (default: 10)
+ * @returns {Promise<Object>} Score history with timestamps and explanations
+ */
+export const getScoreHistory = async (beneficiaryId, limit = 10) => {
+  try {
+    const response = await api.get(`/score-history/${beneficiaryId}`, {
+      params: { limit }
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(`Failed to fetch score history for ${beneficiaryId}: ${error.message}`);
+  }
+};
+
+/**
+ * Create a new user in the system
+ * @param {Object} userData - User data (email, name, role, etc.)
+ * @returns {Promise<Object>} Created user information
+ */
+export const createUser = async (userData) => {
+  try {
+    const response = await api.post('/users', userData);
+    return response.data;
+  } catch (error) {
+    throw new Error(`Failed to create user: ${error.message}`);
   }
 };
 
@@ -141,6 +188,26 @@ export const getHealthStatus = async () => {
 };
 
 /**
+ * Get beneficiary by email address
+ * @param {string} email - Email address to search for
+ * @returns {Promise<Object>} - Beneficiary data
+ */
+export const getBeneficiaryByEmail = async (email) => {
+  try {
+    const response = await api.get(`/beneficiaries?email=${encodeURIComponent(email)}`);
+    
+    // Return the first matching beneficiary if found
+    if (response.data.beneficiaries && response.data.beneficiaries.length > 0) {
+      return response.data.beneficiaries[0];
+    }
+    
+    throw new Error('Beneficiary not found');
+  } catch (error) {
+    throw new Error(`Failed to fetch beneficiary by email: ${error.message}`);
+  }
+};
+
+/**
  * Get API root information
  * @returns {Promise<Object>} API information and available endpoints
  */
@@ -156,13 +223,19 @@ export const getApiInfo = async () => {
 // Export the axios instance for custom requests if needed
 export { api };
 
-// Default export with all API functions
-export default {
+// Update default export to include new function
+const apiExports = {
   getBeneficiary,
   getAllBeneficiaries,
+  getBeneficiaryById,
+  getBeneficiaryByEmail,
   updateBeneficiary,
+  getScoreHistory,
+  createUser,
   simulateScore,
   getFeatureImportance,
   getHealthStatus,
   getApiInfo,
 };
+
+export default apiExports;

@@ -48,6 +48,18 @@ class ZenithScoreModel:
         """
         # Load data
         df = pd.read_csv(data_path)
+        return self.train_initial_model_from_dataframe(df)
+    
+    def train_initial_model_from_dataframe(self, df: pd.DataFrame) -> Dict[str, Any]:
+        """
+        Train the initial SGD classifier model from a pandas DataFrame.
+        
+        Args:
+            df: DataFrame containing beneficiary data
+            
+        Returns:
+            Dictionary containing training results and metrics
+        """
         
         # Prepare features (exclude target and id)
         feature_columns = [col for col in df.columns if col not in ['beneficiary_id', 'creditworthy']]

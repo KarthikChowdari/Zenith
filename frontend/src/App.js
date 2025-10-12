@@ -1,6 +1,6 @@
 /**
  * Main App Component for Project Zenith
- * Entry point for the React application with routing and authentication
+ * Entry point for the React application with role-based routing and authentication
  */
 
 import React from 'react';
@@ -8,14 +8,31 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
 
+// Context Providers
+import { UserProvider } from './contexts/UserContext';
+import { NotificationProvider } from './contexts/NotificationContext';
+
 // Import pages
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import DashboardPage from './pages/DashboardPage';
 
+// Import new role-based pages
+import AdminDashboard from './pages/admin/AdminDashboard';
+import LoanOfficerDashboard from './pages/loan-officer/LoanOfficerDashboard';
+import BeneficiaryDashboard from './pages/beneficiary/BeneficiaryDashboard';
+import BankManagerDashboard from './pages/bank-manager/BankManagerDashboard';
+
 // Import components
 import ProtectedRoute from './components/ProtectedRoute';
+import {
+  AdminRoute,
+  LoanOfficerRoute,
+  BeneficiaryRoute,
+  BankManagerRoute,
+  DashboardRedirect
+} from './components/RoleBasedRoute';
 
 // Create custom theme for Project Zenith
 const theme = createTheme({
@@ -108,29 +125,101 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Router>
-        <div className="App">
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<SignupPage />} />
-            
-            {/* Protected Routes */}
-            <Route 
-              path="/dashboard" 
-              element={
-                <ProtectedRoute>
-                  <DashboardPage />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Fallback Route */}
-            <Route path="*" element={<LandingPage />} />
-          </Routes>
-        </div>
-      </Router>
+      <NotificationProvider>
+        <UserProvider>
+          <Router>
+          <div className="App">
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<SignupPage />} />
+              
+              {/* Smart Dashboard Redirect */}
+              <Route path="/dashboard" element={<DashboardRedirect />} />
+              
+              {/* Legacy Dashboard (fallback) */}
+              <Route 
+                path="/legacy-dashboard" 
+                element={
+                  <ProtectedRoute>
+                    <DashboardPage />
+                  </ProtectedRoute>
+                } 
+              />
+              
+              {/* Role-Based Dashboard Routes */}
+              <Route 
+                path="/admin/dashboard" 
+                element={
+                  <AdminRoute>
+                    <AdminDashboard />
+                  </AdminRoute>
+                } 
+              />
+              
+              <Route 
+                path="/officer/dashboard" 
+                element={
+                  <LoanOfficerRoute>
+                    <LoanOfficerDashboard />
+                  </LoanOfficerRoute>
+                } 
+              />
+              
+              <Route 
+                path="/beneficiary/dashboard" 
+                element={
+                  <BeneficiaryRoute>
+                    <BeneficiaryDashboard />
+                  </BeneficiaryRoute>
+                } 
+              />
+              
+              <Route 
+                path="/manager/dashboard" 
+                element={
+                  <BankManagerRoute>
+                    <BankManagerDashboard />
+                  </BankManagerRoute>
+                } 
+              />
+              
+              {/* Additional Role-Based Routes */}
+              <Route 
+                path="/admin/*" 
+                element={
+                  <AdminRoute>
+                    <AdminDashboard />
+                  </AdminRoute>
+                } 
+              />
+              
+              <Route 
+                path="/officer/*" 
+                element={
+                  <LoanOfficerRoute>
+                    <LoanOfficerDashboard />
+                  </LoanOfficerRoute>
+                } 
+              />
+              
+              <Route 
+                path="/beneficiary/*" 
+                element={
+                  <BeneficiaryRoute>
+                    <BeneficiaryDashboard />
+                  </BeneficiaryRoute>
+                } 
+              />
+              
+              {/* Fallback Route */}
+              <Route path="*" element={<DashboardRedirect />} />
+            </Routes>
+          </div>
+        </Router>
+      </UserProvider>
+    </NotificationProvider>
     </ThemeProvider>
   );
 }
