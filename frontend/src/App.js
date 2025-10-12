@@ -1,12 +1,21 @@
 /**
  * Main App Component for Project Uday
- * Entry point for the React application
+ * Entry point for the React application with routing and authentication
  */
 
 import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
+
+// Import pages
+import LandingPage from './pages/LandingPage';
+import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
 import DashboardPage from './pages/DashboardPage';
+
+// Import components
+import ProtectedRoute from './components/ProtectedRoute';
 
 // Create custom theme for Project Uday
 const theme = createTheme({
@@ -99,9 +108,29 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <div className="App">
-        <DashboardPage />
-      </div>
+      <Router>
+        <div className="App">
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+            
+            {/* Protected Routes */}
+            <Route 
+              path="/dashboard" 
+              element={
+                <ProtectedRoute>
+                  <DashboardPage />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Fallback Route */}
+            <Route path="*" element={<LandingPage />} />
+          </Routes>
+        </div>
+      </Router>
     </ThemeProvider>
   );
 }

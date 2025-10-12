@@ -3,7 +3,7 @@
  * Main dashboard with two-column layout showcasing all features
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Container,
@@ -26,7 +26,9 @@ import {
   MonetizationOn,
   Refresh,
   Person,
+  Logout,
 } from '@mui/icons-material';
+import { useUser, UserButton } from '@clerk/clerk-react';
 
 // Import components
 import ScoreGauge from '../components/ScoreGauge';
@@ -38,6 +40,8 @@ import ScoreSimulator from '../components/ScoreSimulator';
 import { getBeneficiary, getAllBeneficiaries } from '../api/api';
 
 const DashboardPage = () => {
+  const { user } = useUser();
+  
   // State management
   const [selectedBeneficiaryId, setSelectedBeneficiaryId] = useState(1);
   const [beneficiaryData, setBeneficiaryData] = useState(null);
@@ -50,20 +54,8 @@ const DashboardPage = () => {
   const [riskCategory, setRiskCategory] = useState('');
   const [explanation, setExplanation] = useState('');
   
-  // Load all beneficiaries on component mount
-  useEffect(() => {
-    loadBeneficiariesList();
-  }, []);
-  
-  // Load specific beneficiary when selection changes
-  useEffect(() => {
-    if (selectedBeneficiaryId) {
-      loadBeneficiaryData(selectedBeneficiaryId);
-    }
-  }, [selectedBeneficiaryId]);
-  
   // Load beneficiaries list
-  const loadBeneficiariesList = async () => {
+  const loadBeneficiariesList = useCallback(async () => {
     try {
       const data = await getAllBeneficiaries();
       setBeneficiariesList(data.beneficiaries || []);
@@ -76,7 +68,19 @@ const DashboardPage = () => {
       console.error('Error loading beneficiaries list:', err);
       setError('Failed to load beneficiaries list');
     }
-  };
+  }, [selectedBeneficiaryId]);
+  
+  // Load all beneficiaries on component mount
+  useEffect(() => {
+    loadBeneficiariesList();
+  }, [loadBeneficiariesList]);
+  
+  // Load specific beneficiary when selection changes
+  useEffect(() => {
+    if (selectedBeneficiaryId) {
+      loadBeneficiaryData(selectedBeneficiaryId);
+    }
+  }, [selectedBeneficiaryId]);
   
   // Load beneficiary data
   const loadBeneficiaryData = async (beneficiaryId) => {
@@ -134,6 +138,15 @@ const DashboardPage = () => {
             Project Uday - Dynamic Credit Scoring Dashboard
           </Typography>
           
+          {/* User Welcome Message */}
+          {user && (
+            <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
+              <Typography variant="body2" sx={{ mr: 2 }}>
+                Welcome, {user.firstName || user.emailAddresses[0]?.emailAddress}
+              </Typography>
+            </Box>
+          )}
+          
           {/* Beneficiary Selector */}
           <FormControl variant="outlined" sx={{ minWidth: 200, mr: 2 }}>
             <InputLabel sx={{ color: 'white' }}>Select Beneficiary</InputLabel>
@@ -173,9 +186,20 @@ const DashboardPage = () => {
             onClick={handleRefresh}
             disabled={loading}
             startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Refresh />}
+            sx={{ mr: 2 }}
           >
             Refresh
           </Button>
+          
+          {/* User Button from Clerk */}
+          <UserButton 
+            afterSignOutUrl="/"
+            appearance={{
+              elements: {
+                avatarBox: "w-8 h-8",
+              },
+            }}
+          />
         </Toolbar>
       </AppBar>
       
