@@ -1,6 +1,6 @@
 @echo off
 echo ========================================
-echo     Project Uday - Starting Servers
+echo     Project Zenith - Starting Servers
 echo     Dynamic Credit Scoring System
 echo ========================================
 echo.
@@ -21,14 +21,14 @@ if not exist "venv" (
 )
 
 echo Activating virtual environment and starting FastAPI server...
-start "Uday Backend" cmd /k "call venv\Scripts\activate && python main.py"
+start "Zenith Backend" cmd /k "call venv\Scripts\activate && python main.py"
 
 echo.
 echo Starting Frontend Server...
 cd /d "%SCRIPT_DIR%frontend"
 
 echo Starting React development server...
-start "Uday Frontend" cmd /k "npm start"
+start "Zenith Frontend" cmd /k "npm start"
 
 echo.
 echo ========================================

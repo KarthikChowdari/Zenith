@@ -1,5 +1,5 @@
 /**
- * API module for Project Uday
+ * API module for Project Zenith
  * Handles all communication with the FastAPI backend
  */
 

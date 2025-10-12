@@ -1,5 +1,5 @@
 /**
- * ScoreSimulator Component for Project Uday
+ * ScoreSimulator Component for Project Zenith
  * The "killer feature" - Interactive "What-If" tool for score simulation
  */
 
@@ -184,7 +184,7 @@ const ScoreSimulator = ({ currentData, currentScore }) => {
     <Paper elevation={3} sx={{ p: 3, height: '100%' }}>
       <Typography variant="h6" gutterBottom color="primary" fontWeight="bold">
         <Calculate sx={{ verticalAlign: 'middle', mr: 1 }} />
-        Uday Score Simulator
+        Zenith Score Simulator
       </Typography>
       
       <Typography variant="body2" color="textSecondary" paragraph>

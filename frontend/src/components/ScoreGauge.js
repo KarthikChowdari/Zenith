@@ -1,6 +1,6 @@
 /**
- * ScoreGauge Component for Project Uday
- * Displays the Uday credit score in an interactive gauge format
+ * ScoreGauge Component for Project Zenith
+ * Displays the Zenith credit score in an interactive gauge format
  */
 
 import React from 'react';
@@ -47,7 +47,7 @@ const ScoreGauge = ({ score, maxScore = 900, minScore = 300 }) => {
   return (
     <Paper elevation={3} sx={{ p: 3, textAlign: 'center', height: '100%' }}>
       <Typography variant="h6" gutterBottom color="primary" fontWeight="bold">
-        Uday Credit Score
+        Zenith Credit Score
       </Typography>
       
       <Box position="relative" height={200} width="100%">

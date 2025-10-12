@@ -1,5 +1,5 @@
 /**
- * Signup Page for Project Uday
+ * Signup Page for Project Zenith
  * Provides user registration interface
  */
 
@@ -64,7 +64,7 @@ const SignupPage = () => {
                 }}
               />
               <Typography variant="h4" fontWeight="bold" gutterBottom>
-                Join Project Uday
+                Join Project Zenith
               </Typography>
               <Typography variant="h6" color="textSecondary" gutterBottom>
                 Create Your Account

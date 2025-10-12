@@ -1,5 +1,5 @@
 /**
- * RiskMatrix Component for Project Uday
+ * RiskMatrix Component for Project Zenith
  * Displays a 2x2 risk-need matrix highlighting the beneficiary's category
  */
 

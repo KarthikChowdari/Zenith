@@ -1,6 +1,6 @@
-# Project Uday - Dynamic Credit Scoring & Guidance System
+# Project Zenith - Dynamic Credit Scoring & Guidance System
 
-**Project Uday** is a revolutionary AI-powered credit scoring system that provides dynamic, real-time credit assessments and personalized financial guidance for underserved populations.
+**Project Zenith** is a revolutionary AI-powered credit scoring system that provides dynamic, real-time credit assessments and personalized financial guidance for underserved populations.
 
 ## 🌟 Key Innovations
 
@@ -9,7 +9,7 @@
 - Updates scores in near real-time as new data becomes available
 - Continuously improves model accuracy through incremental learning
 
-### 2. "Uday Score Simulator" - The Killer Feature ⭐
+### 2. "Zenith Score Simulator" - The Killer Feature ⭐
 - Interactive "What-If" tool showing how future positive actions improve scores
 - Real-time score projections based on hypothetical improvements
 - Visual journey mapping from current to projected scores
@@ -275,7 +275,7 @@ The system includes sophisticated ML capabilities:
 
 ## 👥 Development Team
 
-**Project Uday** - Built for social impact and financial inclusion
+**Project Zenith** - Built for social impact and financial inclusion
 
 ---
 

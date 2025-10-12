@@ -1,6 +1,6 @@
 @echo off
 echo ========================================
-echo     Project Uday Setup Script
+echo     Project Zenith Setup Script
 echo     Dynamic Credit Scoring System
 echo ========================================
 echo.
@@ -62,7 +62,7 @@ if errorlevel 1 (
 )
 
 echo Starting FastAPI server...
-start "Uday Backend" cmd /k "call venv\Scripts\activate && python main.py"
+start "Zenith Backend" cmd /k "call venv\Scripts\activate && python main.py"
 
 echo.
 echo Step 2: Setting up Frontend...
@@ -86,7 +86,7 @@ if errorlevel 1 (
 )
 
 echo Starting React development server...
-start "Uday Frontend" cmd /k "npm start"
+start "Zenith Frontend" cmd /k "npm start"
 
 echo.
 echo ========================================

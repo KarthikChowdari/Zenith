@@ -1,5 +1,5 @@
 """
-Data Generator for Project Uday
+Data Generator for Project Zenith
 Generates realistic beneficiary data for credit scoring model training
 """
 

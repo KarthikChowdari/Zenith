@@ -1,5 +1,5 @@
 /**
- * DashboardPage Component for Project Uday
+ * DashboardPage Component for Project Zenith
  * Main dashboard with two-column layout showcasing all features
  */
 
@@ -135,7 +135,7 @@ const DashboardPage = () => {
         <Toolbar>
           <DashboardIcon sx={{ mr: 2 }} />
           <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
-            Project Uday - Dynamic Credit Scoring Dashboard
+            Project Zenith - Dynamic Credit Scoring Dashboard
           </Typography>
           
           {/* User Welcome Message */}
@@ -345,7 +345,7 @@ const DashboardPage = () => {
         }}
       >
         <Typography variant="body2">
-          Project Uday - Dynamic Credit Scoring & Guidance System | 
+          Project Zenith - Dynamic Credit Scoring & Guidance System | 
           Powered by AI & Machine Learning | 
           Built for Social Impact
         </Typography>

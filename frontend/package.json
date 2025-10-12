@@ -1,7 +1,7 @@
 {
-  "name": "project-uday-frontend",
+  "name": "project-zenith-frontend",
   "version": "1.0.0",
-  "description": "Frontend for Project Uday - Dynamic Credit Scoring System",
+  "description": "Frontend for Project Zenith - Dynamic Credit Scoring System",
   "private": true,
   "dependencies": {
     "@clerk/clerk-react": "^5.51.0",

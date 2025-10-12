@@ -1,5 +1,5 @@
 /**
- * BeneficiaryProfile Component for Project Uday
+ * BeneficiaryProfile Component for Project Zenith
  * Displays comprehensive beneficiary information and profile details
  */
 
@@ -227,7 +227,7 @@ const BeneficiaryProfile = ({ beneficiaryData, score, riskCategory, explanation 
                 {score}
               </Typography>
               <Typography variant="caption" color="textSecondary">
-                Uday Score
+                Zenith Score
               </Typography>
             </Box>
           </Grid>

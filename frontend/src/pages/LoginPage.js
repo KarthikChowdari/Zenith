@@ -1,5 +1,5 @@
 /**
- * Login Page for Project Uday
+ * Login Page for Project Zenith
  * Provides authentication interface for users
  */
 
@@ -64,7 +64,7 @@ const LoginPage = () => {
                 }}
               />
               <Typography variant="h4" fontWeight="bold" gutterBottom>
-                Project Uday
+                Project Zenith
               </Typography>
               <Typography variant="h6" color="textSecondary" gutterBottom>
                 Dynamic Credit Scoring System

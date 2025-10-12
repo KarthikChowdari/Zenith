@@ -1,5 +1,5 @@
 /**
- * Main App Component for Project Uday
+ * Main App Component for Project Zenith
  * Entry point for the React application with routing and authentication
  */
 
@@ -17,7 +17,7 @@ import DashboardPage from './pages/DashboardPage';
 // Import components
 import ProtectedRoute from './components/ProtectedRoute';
 
-// Create custom theme for Project Uday
+// Create custom theme for Project Zenith
 const theme = createTheme({
   palette: {
     primary: {

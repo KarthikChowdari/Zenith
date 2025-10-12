@@ -1,4 +1,4 @@
-# Project Uday - Dynamic Credit Scoring System
+# Project Zenith - Dynamic Credit Scoring System
 # Python Dependencies for Backend (Compatible with Python 3.13)
 
 # Web Framework

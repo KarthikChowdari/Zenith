@@ -1,5 +1,5 @@
 /**
- * Landing Page for Project Uday
+ * Landing Page for Project Zenith
  * Public page that introduces the system and provides login/signup options
  */
 
@@ -61,7 +61,7 @@ const LandingPage = () => {
         <Toolbar>
           <DashboardIcon sx={{ mr: 2 }} />
           <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
-            Project Uday
+            Project Zenith
           </Typography>
           
           <SignedOut>
@@ -218,7 +218,7 @@ const LandingPage = () => {
           </Typography>
           
           <Typography variant="h6" color="textSecondary" paragraph>
-            Join the future of financial inclusion with Project Uday
+            Join the future of financial inclusion with Project Zenith
           </Typography>
           
           <SignedOut>
@@ -259,7 +259,7 @@ const LandingPage = () => {
         }}
       >
         <Typography variant="body2">
-          Project Uday - Dynamic Credit Scoring & Guidance System | 
+          Project Zenith - Dynamic Credit Scoring & Guidance System | 
           Powered by AI & Machine Learning | 
           Built for Social Impact
         </Typography>

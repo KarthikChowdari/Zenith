@@ -1,5 +1,5 @@
 """
-Explainable AI Module for Project Uday
+Explainable AI Module for Project Zenith
 Provides natural language explanations for credit score predictions using SHAP
 """
 
@@ -9,15 +9,15 @@ import joblib
 import shap
 import os
 from typing import Dict, List, Tuple, Any
-from model import UdayScoreModel
+from model import ZenithScoreModel
 import warnings
 warnings.filterwarnings('ignore')
 
-class UdayExplainer:
-    """Provides natural language explanations for Uday credit scores."""
+class ZenithExplainer:
+    """Provides natural language explanations for Zenith credit scores."""
     
     def __init__(self):
-        self.model = UdayScoreModel()
+        self.model = ZenithScoreModel()
         self.explainer = None
         self.background_data = None
         self.feature_names_map = {
@@ -223,12 +223,12 @@ class UdayExplainer:
 # Utility functions for the API
 def generate_explanation(data_instance: Dict[str, Any]) -> str:
     """Generate explanation for a beneficiary's credit score."""
-    explainer = UdayExplainer()
+    explainer = ZenithExplainer()
     return explainer.generate_explanation(data_instance)
 
 def get_feature_impacts(data_instance: Dict[str, Any]) -> Dict[str, float]:
     """Get feature impacts for a beneficiary."""
-    explainer = UdayExplainer()
+    explainer = ZenithExplainer()
     shap_values, _ = explainer.get_shap_values(data_instance)
     
     if shap_values is None:

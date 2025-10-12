@@ -1,6 +1,6 @@
 
 """
-Project Uday Demo Script
+Project Zenith Demo Script
 Demonstrates all key features of the dynamic credit scoring system
 """
 
@@ -268,7 +268,7 @@ def demo_all_beneficiaries():
 
 def main():
     """Run the complete demonstration."""
-    print("🏆 PROJECT UDAY - DYNAMIC CREDIT SCORING SYSTEM")
+    print("🏆 PROJECT ZENITH - DYNAMIC CREDIT SCORING SYSTEM")
     print("   Award-Winning Hackathon Project Demonstration")
     
     # Check API health first

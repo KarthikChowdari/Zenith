@@ -1,5 +1,5 @@
 """
-Machine Learning Model for Project Uday
+Machine Learning Model for Project Zenith
 Implements dynamic credit scoring with online learning capabilities
 """
 
@@ -15,7 +15,7 @@ from typing import Dict, List, Tuple, Any
 import warnings
 warnings.filterwarnings('ignore')
 
-class UdayScoreModel:
+class ZenithScoreModel:
     """Dynamic credit scoring model with online learning capabilities."""
     
     _instance = None
@@ -31,8 +31,8 @@ class UdayScoreModel:
             self.model = None
             self.scaler = None
             self.feature_columns = None
-            self.model_path = "uday_model.joblib"
-            self.scaler_path = "uday_scaler.joblib"
+            self.model_path = "zenith_model.joblib"
+            self.scaler_path = "zenith_scaler.joblib"
             self.columns_path = "feature_columns.joblib"
             self.initialized = True
         
@@ -89,7 +89,7 @@ class UdayScoreModel:
         joblib.dump(self.feature_columns, self.columns_path)
         
         # Mark as loaded in singleton
-        UdayScoreModel._model_loaded = True
+        ZenithScoreModel._model_loaded = True
         
         print(f"Initial model trained with accuracy: {accuracy:.3f}")
         print(f"Model saved to {self.model_path}")
@@ -110,7 +110,7 @@ class UdayScoreModel:
             True if successfully loaded, False otherwise
         """
         # Return immediately if already loaded
-        if UdayScoreModel._model_loaded and self.model is not None:
+        if ZenithScoreModel._model_loaded and self.model is not None:
             return True
             
         try:
@@ -118,12 +118,12 @@ class UdayScoreModel:
                 self.model = joblib.load(self.model_path)
                 self.scaler = joblib.load(self.scaler_path)
                 self.feature_columns = joblib.load(self.columns_path)
-                UdayScoreModel._model_loaded = True
+                ZenithScoreModel._model_loaded = True
                 return True
             return False
         except Exception as e:
             print(f"Error loading model: {e}")
-            UdayScoreModel._model_loaded = False
+            ZenithScoreModel._model_loaded = False
             return False
     
     def update_model(self, new_data_instance: Dict[str, Any]) -> Dict[str, str]:
@@ -154,7 +154,7 @@ class UdayScoreModel:
             joblib.dump(self.model, self.model_path)
             
             # Keep singleton marked as loaded
-            UdayScoreModel._model_loaded = True
+            ZenithScoreModel._model_loaded = True
             
             return {"status": "success", "message": "Model updated successfully"}
             
@@ -223,13 +223,13 @@ class UdayScoreModel:
     
     def predict_score(self, data: Dict[str, Any]) -> int:
         """
-        Predict the Uday score (300-900 scale) for a beneficiary.
+        Predict the Zenith score (300-900 scale) for a beneficiary.
         
         Args:
             data: Dictionary containing beneficiary features
             
         Returns:
-            Uday score between 300 and 900
+            Zenith score between 300 and 900
         """
         if not self.load_model():
             return 500  # Default score if model not available
@@ -303,27 +303,27 @@ class UdayScoreModel:
 # Utility functions for the API
 def train_initial_model(data_path: str = "beneficiaries.csv") -> Dict[str, Any]:
     """Train the initial model and return training results."""
-    model = UdayScoreModel()
+    model = ZenithScoreModel()
     return model.train_initial_model(data_path)
 
 def predict_score(data: Dict[str, Any]) -> int:
-    """Predict Uday score for given data."""
-    model = UdayScoreModel()
+    """Predict Zenith score for given data."""
+    model = ZenithScoreModel()
     return model.predict_score(data)
 
 def predict_risk_need(data: Dict[str, Any]) -> str:
     """Predict risk-need category for given data."""
-    model = UdayScoreModel()
+    model = ZenithScoreModel()
     return model.predict_risk_need(data)
 
 def update_model(new_data_instance: Dict[str, Any]) -> Dict[str, str]:
     """Update model with new data instance."""
-    model = UdayScoreModel()
+    model = ZenithScoreModel()
     return model.update_model(new_data_instance)
 
 def get_feature_importance() -> Dict[str, float]:
     """Get feature importance from the model."""
-    model = UdayScoreModel()
+    model = ZenithScoreModel()
     return model.get_feature_importance()
 
 if __name__ == "__main__":

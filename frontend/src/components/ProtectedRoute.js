@@ -1,5 +1,5 @@
 /**
- * Protected Route Component for Project Uday
+ * Protected Route Component for Project Zenith
  * Ensures only authenticated users can access protected pages
  */
 

@@ -1,5 +1,5 @@
 """
-FastAPI Backend for Project Uday
+FastAPI Backend for Project Zenith
 Dynamic Credit Scoring and Guidance System
 """
 
@@ -19,7 +19,7 @@ from model import (
     predict_score, 
     predict_risk_need, 
     update_model,
-    UdayScoreModel
+    ZenithScoreModel
 )
 from explainer import generate_explanation, get_feature_impacts
 
@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="Project Uday - Dynamic Credit Scoring API",
+    title="Project Zenith - Dynamic Credit Scoring API",
     description="AI-powered credit scoring system with dynamic learning and guidance",
     version="1.0.0"
 )
@@ -100,7 +100,7 @@ def initialize_system():
     load_beneficiary_data()
     
     # Train model if it doesn't exist
-    if not os.path.exists("uday_model.joblib"):
+    if not os.path.exists("zenith_model.joblib"):
         print("Training initial model...")
         train_initial_model("beneficiaries.csv")
         print("Model training completed!")
@@ -114,7 +114,7 @@ async def startup_event():
 async def root():
     """Root endpoint with API information."""
     return {
-        "message": "Welcome to Project Uday - Dynamic Credit Scoring API",
+        "message": "Welcome to Project Zenith - Dynamic Credit Scoring API",
         "version": "1.0.0",
         "endpoints": {
             "beneficiary": "/beneficiary/{beneficiary_id}",
@@ -208,7 +208,7 @@ async def update_beneficiary_model(request: UpdateRequest):
     """
     try:
         # Validate input data first
-        model_instance = UdayScoreModel()
+        model_instance = ZenithScoreModel()
         is_valid, error_msg = model_instance.validate_data(request.new_data)
         
         if not is_valid:
@@ -263,7 +263,7 @@ async def update_beneficiary_model(request: UpdateRequest):
 async def simulate_score(request: SimulateRequest):
     """
     Simulate future score based on hypothetical changes.
-    This is the core "What-If" feature of Project Uday.
+    This is the core "What-If" feature of Project Zenith.
     
     Args:
         request: Simulation request with current data and hypothetical changes
@@ -354,7 +354,7 @@ async def get_feature_importance():
         Dictionary of feature names and their importance scores
     """
     try:
-        model = UdayScoreModel()
+        model = ZenithScoreModel()
         importance = model.get_feature_importance()
         
         if not importance:
@@ -376,7 +376,7 @@ async def health_check():
     """Health check endpoint."""
     return {
         "status": "healthy",
-        "model_available": os.path.exists("uday_model.joblib"),
+        "model_available": os.path.exists("zenith_model.joblib"),
         "data_available": os.path.exists("beneficiaries.csv"),
         "total_beneficiaries": len(beneficiary_data) if beneficiary_data is not None else 0
     }
