@@ -1,6 +1,6 @@
 /**
- * Beneficiary Dashboard for Project Zenith
- * Personal dashboard for beneficiaries to view their credit profile
+ * Enhanced Beneficiary Dashboard for Project Zenith
+ * Complete dashboard with 4-section layout as requested
  */
 
 import React, { useState, useEffect } from 'react';
@@ -37,10 +37,15 @@ import {
   Timeline as TimelineIcon,
   Home as HomeIcon,
 } from '@mui/icons-material';
+
 // Import API functions and components
 import { getBeneficiaryByEmail, getScoreHistory } from '../../api/api';
 import { useUser } from '@clerk/clerk-react';
 import ScoreGauge from '../../components/ScoreGauge';
+import BeneficiaryProfile from '../../components/BeneficiaryProfile';
+import RiskMatrix from '../../components/RiskMatrix';
+import ScoreSimulator from '../../components/ScoreSimulator';
+import InstaLoanEligibility from '../../components/InstaLoanEligibility';
 import NavigationBar from '../../components/NavigationBar';
 
 // Tab panel component
@@ -84,6 +89,7 @@ const BeneficiaryDashboard = () => {
           
           // Load beneficiary profile
           const beneficiary = await getBeneficiaryByEmail(email);
+          console.log('Loaded beneficiary data:', beneficiary); // Debug log
           setBeneficiaryData(beneficiary);
 
           // Load score history if beneficiary exists
@@ -216,274 +222,290 @@ const BeneficiaryDashboard = () => {
       <NavigationBar />
 
       <Container maxWidth="xl" sx={{ mt: 3, mb: 3 }}>
-        {/* Credit Score Overview */}
+        {/* Welcome Header */}
+        <Box sx={{ mb: 4, textAlign: 'center' }}>
+          <Typography variant="h4" fontWeight="bold" color="primary" gutterBottom>
+            Welcome to Your Credit Dashboard
+          </Typography>
+          <Typography variant="subtitle1" color="textSecondary">
+            {beneficiaryData.name || `Beneficiary #${beneficiaryData.beneficiary_id}`}
+          </Typography>
+          <Chip 
+            label={`Score: ${currentScore}`} 
+            color={scoreLevel.color} 
+            size="large" 
+            sx={{ mt: 1, fontSize: '1rem', px: 2 }}
+          />
+        </Box>
+
+        {/* Main Dashboard Layout */}
+        
+        {/* Top Row: Beneficiary Profile (Left) + Score Simulator (Right) */}
         <Grid container spacing={3} sx={{ mb: 3 }}>
-          <Grid item xs={12} md={4}>
-            <Card sx={{ height: '100%' }}>
-              <CardContent sx={{ textAlign: 'center' }}>
-                <Typography variant="h6" gutterBottom>
-                  Your Credit Score
-                </Typography>
-                <ScoreGauge score={currentScore} size={180} />
-                <Box sx={{ mt: 2 }}>
-                  <Chip
-                    icon={<ScoreLevelIcon />}
-                    label={scoreLevel.level}
-                    color={scoreLevel.color}
-                    sx={{ fontSize: '1rem', px: 2, py: 1 }}
-                  />
-                </Box>
-              </CardContent>
-            </Card>
+          <Grid item xs={12} lg={6}>
+            <BeneficiaryProfile
+              beneficiaryData={beneficiaryData}
+              score={currentScore}
+              riskCategory={beneficiaryData?.risk_category}
+              explanation={beneficiaryData?.explanation || `This beneficiary has a credit score of ${currentScore} based on their financial history and behavior patterns. The assessment considers factors such as loan repayment history, utility bill payments, employment status, and overall financial stability.`}
+            />
           </Grid>
-
-          <Grid item xs={12} md={8}>
-            <Card sx={{ height: '100%' }}>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Score Analysis
-                </Typography>
-                <Typography variant="body1" paragraph>
-                  {getScoreAdvice(currentScore)}
-                </Typography>
-                
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="body2" color="textSecondary" gutterBottom>
-                    Risk Category
-                  </Typography>
-                  <Chip
-                    label={beneficiaryData.risk_category || 'Not Assessed'}
-                    color={getRiskColor(beneficiaryData.risk_category)}
-                    size="medium"
-                  />
-                </Box>
-
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="body2" color="textSecondary" gutterBottom>
-                    Score Range Progress
-                  </Typography>
-                  <LinearProgress
-                    variant="determinate"
-                    value={(currentScore / 850) * 100}
-                    sx={{ height: 8, borderRadius: 4 }}
-                    color={scoreLevel.color}
-                  />
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
-                    <Typography variant="caption">300</Typography>
-                    <Typography variant="caption">850</Typography>
-                  </Box>
-                </Box>
-
-                <Typography variant="body2" color="textSecondary">
-                  Last updated: {beneficiaryData.updated_at ? 
-                    new Date(beneficiaryData.updated_at).toLocaleDateString() : 
-                    'Never'
-                  }
-                </Typography>
-              </CardContent>
-            </Card>
+          
+          <Grid item xs={12} lg={6}>
+            <ScoreSimulator
+              currentData={beneficiaryData}
+              currentScore={currentScore}
+            />
           </Grid>
         </Grid>
 
-        {/* Navigation Tabs */}
-        <Paper sx={{ mb: 3 }}>
-          <Tabs
-            value={currentTab}
-            onChange={handleTabChange}
-            variant="scrollable"
-            scrollButtons="auto"
-          >
-            <Tab icon={<PersonIcon />} label="Profile" />
-            <Tab icon={<HistoryIcon />} label="Score History" />
-            <Tab icon={<AssessmentIcon />} label="Recommendations" />
-          </Tabs>
-        </Paper>
-
-        {/* Tab Content */}
-        <TabPanel value={currentTab} index={0}>
-          {/* Profile Information */}
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={6}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Personal Information
-                  </Typography>
-                  <List>
-                    <ListItem>
-                      <ListItemIcon>
-                        <AccountCircleIcon />
-                      </ListItemIcon>
-                      <ListItemText
-                        primary="Full Name"
-                        secondary={beneficiaryData.name || 'Not provided'}
-                      />
-                    </ListItem>
-                    <Divider />
-                    <ListItem>
-                      <ListItemIcon>
-                        <PersonIcon />
-                      </ListItemIcon>
-                      <ListItemText
-                        primary="Age"
-                        secondary={beneficiaryData.age || 'Not provided'}
-                      />
-                    </ListItem>
-                    <Divider />
-                    <ListItem>
-                      <ListItemIcon>
-                        <PersonIcon />
-                      </ListItemIcon>
-                      <ListItemText
-                        primary="Gender"
-                        secondary={beneficiaryData.gender || 'Not provided'}
-                      />
-                    </ListItem>
-                  </List>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            <Grid item xs={12} md={6}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Contact Information
-                  </Typography>
-                  <List>
-                    <ListItem>
-                      <ListItemIcon>
-                        <PersonIcon />
-                      </ListItemIcon>
-                      <ListItemText
-                        primary="Email"
-                        secondary={beneficiaryData.email || user?.emailAddresses?.[0]?.emailAddress}
-                      />
-                    </ListItem>
-                    <Divider />
-                    <ListItem>
-                      <ListItemIcon>
-                        <HomeIcon />
-                      </ListItemIcon>
-                      <ListItemText
-                        primary="Address"
-                        secondary="Update your address in profile settings"
-                      />
-                    </ListItem>
-                  </List>
-                </CardContent>
-              </Card>
+        {/* Bottom Row: Score Gauge + Risk Matrix (Left) + Insta Loan Eligibility (Right) */}
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          <Grid item xs={12} lg={6}>
+            <Grid container spacing={3} sx={{ height: '100%' }}>
+              <Grid item xs={12} md={6}>
+                <Box sx={{ height: '100%' }}>
+                  <ScoreGauge 
+                    score={currentScore} 
+                    maxScore={900}
+                    minScore={300}
+                  />
+                </Box>
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <Box sx={{ height: '100%' }}>
+                  <RiskMatrix
+                    riskCategory={beneficiaryData?.risk_category}
+                    score={beneficiaryData?.credit_score || currentScore}
+                  />
+                </Box>
+              </Grid>
             </Grid>
           </Grid>
-        </TabPanel>
+          
+          <Grid item xs={12} lg={6}>
+            <InstaLoanEligibility
+              beneficiaryData={beneficiaryData}
+              score={currentScore}
+            />
+          </Grid>
+        </Grid>
 
-        <TabPanel value={currentTab} index={1}>
-          {/* Score History */}
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Credit Score History
-              </Typography>
-              {scoreHistory.length > 0 ? (
-                <List>
-                  {scoreHistory.slice(0, 10).map((entry, index) => (
-                    <React.Fragment key={index}>
-                      <ListItem>
-                        <ListItemIcon>
-                          <TimelineIcon />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={`Score: ${entry.score || 'N/A'}`}
-                          secondary={entry.scored_at ? 
-                            new Date(entry.scored_at).toLocaleDateString() : 
-                            'Unknown date'
-                          }
-                        />
-                        <Chip
-                          label={entry.score >= 700 ? 'Good' : entry.score >= 600 ? 'Fair' : 'Poor'}
-                          color={entry.score >= 700 ? 'success' : entry.score >= 600 ? 'primary' : 'error'}
-                          size="small"
-                        />
-                      </ListItem>
-                      {index < scoreHistory.length - 1 && <Divider />}
-                    </React.Fragment>
-                  ))}
-                </List>
-              ) : (
-                <Typography variant="body1" color="textSecondary">
-                  No score history available yet. Your score will be tracked as it updates.
+        {/* Additional Sections - Tabs for extra information */}
+        <Paper elevation={3} sx={{ mt: 4 }}>
+          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <Tabs
+              value={currentTab}
+              onChange={handleTabChange}
+              variant="scrollable"
+              scrollButtons="auto"
+              sx={{ px: 2 }}
+            >
+              <Tab icon={<HistoryIcon />} label="Score History" />
+              <Tab icon={<AssessmentIcon />} label="Recommendations" />
+              <Tab icon={<TrendingUpIcon />} label="Financial Insights" />
+            </Tabs>
+          </Box>
+
+          {/* Tab Content */}
+          <TabPanel value={currentTab} index={0}>
+            {/* Score History */}
+            <Typography variant="h6" gutterBottom>
+              Credit Score History & Trends
+            </Typography>
+            {scoreHistory.length > 0 ? (
+              <List>
+                {scoreHistory.slice(0, 10).map((entry, index) => (
+                  <React.Fragment key={index}>
+                    <ListItem>
+                      <ListItemIcon>
+                        <TimelineIcon />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={`Score: ${entry.score || 'N/A'}`}
+                        secondary={entry.scored_at ? 
+                          new Date(entry.scored_at).toLocaleDateString() : 
+                          'Unknown date'
+                        }
+                      />
+                      <Chip
+                        label={entry.score >= 700 ? 'Excellent' : entry.score >= 600 ? 'Good' : entry.score >= 500 ? 'Fair' : 'Poor'}
+                        color={entry.score >= 700 ? 'success' : entry.score >= 600 ? 'primary' : entry.score >= 500 ? 'warning' : 'error'}
+                        size="small"
+                      />
+                    </ListItem>
+                    {index < scoreHistory.length - 1 && <Divider />}
+                  </React.Fragment>
+                ))}
+              </List>
+            ) : (
+              <Alert severity="info">
+                <Typography variant="body1">
+                  No score history available yet. Your score will be tracked as it updates over time.
                 </Typography>
-              )}
-            </CardContent>
-          </Card>
-        </TabPanel>
+              </Alert>
+            )}
+          </TabPanel>
 
-        <TabPanel value={currentTab} index={2}>
-          {/* Recommendations */}
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={6}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom color="success.main">
-                    <CheckCircleIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-                    Good Practices
-                  </Typography>
-                  <List>
-                    <ListItem>
-                      <ListItemText
-                        primary="Pay bills on time"
-                        secondary="Payment history is the most important factor"
-                      />
-                    </ListItem>
-                    <ListItem>
-                      <ListItemText
-                        primary="Keep credit utilization low"
-                        secondary="Use less than 30% of available credit"
-                      />
-                    </ListItem>
-                    <ListItem>
-                      <ListItemText
-                        primary="Maintain old accounts"
-                        secondary="Longer credit history improves your score"
-                      />
-                    </ListItem>
-                  </List>
-                </CardContent>
-              </Card>
-            </Grid>
+          <TabPanel value={currentTab} index={1}>
+            {/* Personalized Recommendations */}
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={6}>
+                <Card sx={{ height: '100%' }}>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom color="success.main">
+                      <CheckCircleIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+                      Strengths to Maintain
+                    </Typography>
+                    <List>
+                      {beneficiaryData?.loan_repayment_status === 1 && (
+                        <ListItem>
+                          <ListItemText
+                            primary="Excellent loan repayment history"
+                            secondary="Continue making payments on time to maintain your score"
+                          />
+                        </ListItem>
+                      )}
+                      {beneficiaryData?.electricity_bill_paid_on_time === 1 && (
+                        <ListItem>
+                          <ListItemText
+                            primary="Timely utility bill payments"
+                            secondary="Your consistent bill payments show financial responsibility"
+                          />
+                        </ListItem>
+                      )}
+                      {beneficiaryData?.employment_type === 2 && (
+                        <ListItem>
+                          <ListItemText
+                            primary="Stable employment"
+                            secondary="Your salaried employment provides income stability"
+                          />
+                        </ListItem>
+                      )}
+                      {beneficiaryData?.monthly_income >= 20000 && (
+                        <ListItem>
+                          <ListItemText
+                            primary="Good income level"
+                            secondary="Your income supports loan eligibility"
+                          />
+                        </ListItem>
+                      )}
+                    </List>
+                  </CardContent>
+                </Card>
+              </Grid>
 
-            <Grid item xs={12} md={6}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom color="primary.main">
-                    <TrendingUpIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-                    Improvement Tips
-                  </Typography>
-                  <List>
-                    <ListItem>
-                      <ListItemText
-                        primary="Monitor your credit report"
-                        secondary="Check for errors and dispute them"
-                      />
-                    </ListItem>
-                    <ListItem>
-                      <ListItemText
-                        primary="Diversify credit types"
-                        secondary="Have a mix of credit cards and loans"
-                      />
-                    </ListItem>
-                    <ListItem>
-                      <ListItemText
-                        primary="Limit new credit applications"
-                        secondary="Too many inquiries can lower your score"
-                      />
-                    </ListItem>
-                  </List>
-                </CardContent>
-              </Card>
+              <Grid item xs={12} md={6}>
+                <Card sx={{ height: '100%' }}>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom color="primary.main">
+                      <TrendingUpIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+                      Areas for Improvement
+                    </Typography>
+                    <List>
+                      {beneficiaryData?.loan_repayment_status === 0 && (
+                        <ListItem>
+                          <ListItemText
+                            primary="Improve loan repayment behavior"
+                            secondary="Focus on making all future payments on time"
+                          />
+                        </ListItem>
+                      )}
+                      {beneficiaryData?.electricity_bill_paid_on_time === 0 && (
+                        <ListItem>
+                          <ListItemText
+                            primary="Set up automatic bill payments"
+                            secondary="Automate utility payments to avoid late fees"
+                          />
+                        </ListItem>
+                      )}
+                      {beneficiaryData?.mobile_recharge_frequency < 3 && (
+                        <ListItem>
+                          <ListItemText
+                            primary="Increase mobile recharge frequency"
+                            secondary="Regular recharges show active financial behavior"
+                          />
+                        </ListItem>
+                      )}
+                      {beneficiaryData?.employment_type === 0 && (
+                        <ListItem>
+                          <ListItemText
+                            primary="Seek stable employment"
+                            secondary="Steady income improves creditworthiness"
+                          />
+                        </ListItem>
+                      )}
+                    </List>
+                  </CardContent>
+                </Card>
+              </Grid>
             </Grid>
-          </Grid>
-        </TabPanel>
+          </TabPanel>
+
+          <TabPanel value={currentTab} index={2}>
+            {/* Financial Insights */}
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={4}>
+                <Card>
+                  <CardContent sx={{ textAlign: 'center' }}>
+                    <Typography variant="h4" color="primary" fontWeight="bold">
+                      {currentScore}
+                    </Typography>
+                    <Typography variant="h6" gutterBottom>
+                      Current Credit Score
+                    </Typography>
+                    <LinearProgress
+                      variant="determinate"
+                      value={(currentScore / 900) * 100}
+                      sx={{ mt: 2, height: 8, borderRadius: 4 }}
+                      color={scoreLevel.color}
+                    />
+                    <Typography variant="caption" color="textSecondary" display="block" mt={1}>
+                      {scoreLevel.level} Rating
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+              
+              <Grid item xs={12} md={4}>
+                <Card>
+                  <CardContent sx={{ textAlign: 'center' }}>
+                    <Typography variant="h4" color="success.main" fontWeight="bold">
+                      ₹{beneficiaryData?.monthly_income?.toLocaleString() || '0'}
+                    </Typography>
+                    <Typography variant="h6" gutterBottom>
+                      Monthly Income
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      Employment: {
+                        beneficiaryData?.employment_type === 2 ? 'Salaried' :
+                        beneficiaryData?.employment_type === 1 ? 'Self-employed' :
+                        'Unemployed'
+                      }
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+              
+              <Grid item xs={12} md={4}>
+                <Card>
+                  <CardContent sx={{ textAlign: 'center' }}>
+                    <Typography variant="h4" color="warning.main" fontWeight="bold">
+                      {beneficiaryData?.risk_category?.split(' - ')[0] || 'Unknown'}
+                    </Typography>
+                    <Typography variant="h6" gutterBottom>
+                      Risk Level
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      Need Level: {beneficiaryData?.is_high_need ? 'High' : 'Low'}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+          </TabPanel>
+        </Paper>
       </Container>
     </Box>
   );

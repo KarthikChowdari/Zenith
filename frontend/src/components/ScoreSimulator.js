@@ -63,7 +63,15 @@ const ScoreSimulator = ({ currentData, currentScore }) => {
     setError(null);
     
     try {
+      // Debug: Log the data being sent to backend
+      console.log('Sending to backend:', {
+        current_data: currentData,
+        hypothetical_changes: hypotheticalChanges
+      });
+      
       const result = await simulateScore(currentData, hypotheticalChanges);
+      
+      console.log('Backend simulation result:', result);
       
       setProjectedScore(result.projected_score);
       setScoreChange(result.score_change);
@@ -77,10 +85,89 @@ const ScoreSimulator = ({ currentData, currentScore }) => {
       setChartData(chartData);
       
     } catch (err) {
-      setError(err.message);
+      console.error('Backend simulation failed:', err.message);
+      
+      // Check if it's a connection issue
+      if (err.message.includes('No response from server') || err.message.includes('Network Error')) {
+        setError(`Backend server not responding. Please ensure the backend server is running on http://localhost:8000`);
+      } else {
+        // For other errors, try local fallback but show a warning
+        console.warn('Using local fallback calculation');
+        const localResult = simulateScoreLocally(currentData, hypotheticalChanges);
+        
+        setProjectedScore(localResult.projected_score);
+        setScoreChange(localResult.score_change);
+        setExplanation(`⚠️ Using simplified calculation (backend unavailable): ${localResult.explanation}`);
+        
+        // Create chart data for visualization
+        const chartData = [
+          { month: 'Current', score: currentScore, label: 'Current Score' },
+          { month: 'Projected', score: localResult.projected_score, label: 'Projected Score' },
+        ];
+        setChartData(chartData);
+      }
     } finally {
       setLoading(false);
     }
+  };
+
+  // Local simulation fallback function
+  const simulateScoreLocally = (current, changes) => {
+    let baseScore = currentScore || 650;
+    let scoreAdjustment = 0;
+    
+    // Simple scoring logic based on changes
+    Object.entries(changes).forEach(([key, value]) => {
+      switch (key) {
+        case 'monthly_income':
+          const incomeChange = (value - (current.monthly_income || 0)) / 1000;
+          scoreAdjustment += Math.min(incomeChange * 2, 50); // Max 50 points for income
+          break;
+        case 'employment_type':
+          if (value > (current.employment_type || 0)) scoreAdjustment += 25;
+          if (value < (current.employment_type || 0)) scoreAdjustment -= 15;
+          break;
+        case 'loan_repayment_status':
+          if (value > (current.loan_repayment_status || 0)) scoreAdjustment += 40;
+          if (value < (current.loan_repayment_status || 0)) scoreAdjustment -= 40;
+          break;
+        case 'electricity_bill_paid_on_time':
+          if (value > (current.electricity_bill_paid_on_time || 0)) scoreAdjustment += 30;
+          if (value < (current.electricity_bill_paid_on_time || 0)) scoreAdjustment -= 30;
+          break;
+        case 'mobile_recharge_frequency':
+          if (value > (current.mobile_recharge_frequency || 0)) scoreAdjustment += 15;
+          if (value < (current.mobile_recharge_frequency || 0)) scoreAdjustment -= 10;
+          break;
+        case 'loan_tenure_months':
+          const tenureChange = value - (current.loan_tenure_months || 12);
+          if (tenureChange < 0) scoreAdjustment += 10; // Shorter tenure is better
+          if (tenureChange > 0) scoreAdjustment -= 5; // Longer tenure is slightly worse
+          break;
+        default:
+          break;
+      }
+    });
+    
+    const projectedScore = Math.max(300, Math.min(850, baseScore + scoreAdjustment));
+    
+    // Generate explanation
+    let explanation = "Local simulation based on your changes: ";
+    if (scoreAdjustment > 0) {
+      explanation += `These improvements could increase your score by approximately ${Math.round(scoreAdjustment)} points. `;
+    } else if (scoreAdjustment < 0) {
+      explanation += `These changes might decrease your score by approximately ${Math.round(Math.abs(scoreAdjustment))} points. `;
+    } else {
+      explanation += "These changes would have minimal impact on your current score. ";
+    }
+    
+    explanation += "This is a simplified calculation. For more accurate projections, ensure the backend server is running.";
+    
+    return {
+      projected_score: Math.round(projectedScore),
+      score_change: Math.round(scoreAdjustment),
+      explanation: explanation
+    };
   };
   
   // Handle parameter changes with proper type validation
