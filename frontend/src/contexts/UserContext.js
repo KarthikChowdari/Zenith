@@ -5,7 +5,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useUser } from '@clerk/clerk-react';
-import { api } from '../api/api';
+import { getUserByClerkId, syncClerkUser } from '../api/api';
 
 const UserContext = createContext();
 
@@ -33,26 +33,43 @@ export const UserProvider = ({ children }) => {
 
       try {
         if (isSignedIn && user) {
-          // Check if user exists in database
-          const response = await api.get(`/users/clerk/${user.id}`);
-          
-          if (response.data.needs_registration) {
-            // User doesn't exist, sync them
-            const syncData = {
+          try {
+            // Try to check if user exists in database
+            const response = await getUserByClerkId(user.id);
+            
+            if (response.needs_registration) {
+              // User doesn't exist, sync them
+              const syncData = {
+                clerk_user_id: user.id,
+                email: user.primaryEmailAddress?.emailAddress,
+                first_name: user.firstName || '',
+                last_name: user.lastName || '',
+              };
+
+              await syncClerkUser(syncData);
+              
+              // Fetch the newly created user
+              const newUserResponse = await getUserByClerkId(user.id);
+              setDbUser(newUserResponse.user);
+            } else {
+              // User exists, use the data
+              setDbUser(response.user);
+            }
+          } catch (apiError) {
+            // If backend is not available or user sync fails, create a temporary user
+            console.warn('Backend sync failed, using temporary user:', apiError.message);
+            setDbUser({
+              id: user.id,
               clerk_user_id: user.id,
               email: user.primaryEmailAddress?.emailAddress,
               first_name: user.firstName || '',
               last_name: user.lastName || '',
-            };
-
-            await api.post('/users/sync-clerk', syncData);
-            
-            // Fetch the newly created user
-            const newUserResponse = await api.get(`/users/clerk/${user.id}`);
-            setDbUser(newUserResponse.data.user);
-          } else {
-            // User exists, use the data
-            setDbUser(response.data.user);
+              role: 'beneficiary', // Default role
+              permissions: [],
+              is_active: true,
+              created_at: new Date().toISOString(),
+              temp_user: true // Flag to indicate this is a temporary user
+            });
           }
         } else {
           setDbUser(null);
@@ -73,8 +90,8 @@ export const UserProvider = ({ children }) => {
   const refreshUser = async () => {
     if (user?.id) {
       try {
-        const response = await api.get(`/users/clerk/${user.id}`);
-        setDbUser(response.data.user);
+        const response = await getUserByClerkId(user.id);
+        setDbUser(response.user);
       } catch (err) {
         console.error('Error refreshing user data:', err);
       }

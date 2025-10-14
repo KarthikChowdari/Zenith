@@ -232,18 +232,23 @@ async def root():
     }
 
 @app.get("/beneficiaries", response_model=BeneficiaryListResponse)
-async def get_all_beneficiaries(tenant_id: Optional[str] = None):
+async def get_all_beneficiaries(tenant_id: Optional[str] = None, email: Optional[str] = None):
     """
     Get all beneficiaries with their latest scores.
     
     Args:
         tenant_id: Optional tenant ID for multi-tenant filtering
+        email: Optional email filter to find specific beneficiary
         
     Returns:
-        List of all beneficiaries with their latest credit scores
+        List of all beneficiaries with their latest credit scores (or single beneficiary if email provided)
     """
     try:
         beneficiaries = await beneficiary_repo.get_all_beneficiaries(tenant_id)
+        
+        # Filter by email if provided
+        if email:
+            beneficiaries = [ben for ben in beneficiaries if ben.get('email', '').lower() == email.lower()]
         
         # Format the data for the frontend
         formatted_beneficiaries = []
@@ -329,10 +334,25 @@ async def get_beneficiary(beneficiary_id: str):
             
             await score_repo.save_score(beneficiary_id, score_data, 'system')
         
-        # Prepare response data
+        # Prepare response data with proper formatting for frontend
         response_data = {
-            k: v for k, v in beneficiary.items() 
-            if k not in ['id', 'user_id', 'created_at', 'updated_at']
+            'beneficiary_id': beneficiary.get('beneficiary_code', str(beneficiary['id'])),
+            'age': beneficiary.get('age', 30),
+            'employment_type': beneficiary.get('employment_type', 0),  # 0=unemployed, 1=self_employed, 2=salaried
+            'monthly_income': beneficiary.get('monthly_income', 0),
+            'loan_repayment_status': beneficiary.get('loan_repayment_status', 0),  # 1=good, 0=poor
+            'loan_tenure_months': beneficiary.get('loan_tenure_months', 0),
+            'electricity_bill_paid_on_time': beneficiary.get('electricity_bill_paid_on_time', 0),  # 1=yes, 0=no
+            'mobile_recharge_frequency': beneficiary.get('mobile_recharge_frequency', 0),
+            'is_high_need': beneficiary.get('is_high_need', False),
+            'credit_score': score,
+            'risk_category': risk_category,
+            'explanation': explanation,
+            'name': f"{beneficiary.get('first_name', '')} {beneficiary.get('last_name', '')}".strip() or f"Beneficiary {beneficiary.get('beneficiary_code', beneficiary['id'])}",
+            'email': beneficiary.get('email', ''),
+            'gender': beneficiary.get('gender', 'Not specified'),
+            'created_at': beneficiary.get('created_at').isoformat() if beneficiary.get('created_at') else None,
+            'updated_at': beneficiary.get('updated_at').isoformat() if beneficiary.get('updated_at') else None
         }
         
         return BeneficiaryResponse(
@@ -975,6 +995,62 @@ async def get_feature_importance():
             status_code=500,
             detail=ErrorResponse(
                 message="Error getting feature importance",
+                details=str(e)
+            ).dict()
+        )
+
+@app.post("/create-demo-beneficiary")
+async def create_demo_beneficiary(email: str):
+    """
+    Create a demo beneficiary for testing with the provided email.
+    
+    Args:
+        email: Email address for the demo beneficiary
+        
+    Returns:
+        Created beneficiary data with score
+    """
+    try:
+        # Create sample beneficiary data
+        demo_data = {
+            'email': email,
+            'first_name': 'Demo',
+            'last_name': 'User',
+            'age': 35,
+            'monthly_income': 25000,
+            'employment_type': 2,  # Salaried
+            'loan_repayment_status': 1,  # Good
+            'loan_tenure_months': 12,
+            'electricity_bill_paid_on_time': 1,  # Yes
+            'mobile_recharge_frequency': 2,
+            'is_high_need': False,
+            'beneficiary_code': f'DEMO{hash(email) % 10000:04d}'
+        }
+        
+        # Calculate credit score for demo data
+        ml_data = prepare_beneficiary_for_ml(demo_data)
+        credit_score = predict_score(ml_data)
+        risk_category = predict_risk_need(ml_data)
+        explanation = generate_explanation(ml_data)
+        
+        # Add calculated values
+        demo_data.update({
+            'credit_score': credit_score,
+            'risk_category': risk_category,
+            'explanation': explanation
+        })
+        
+        return SuccessResponse(
+            message="Demo beneficiary created successfully",
+            data=demo_data
+        )
+        
+    except Exception as e:
+        logger.error(f"Error creating demo beneficiary: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=ErrorResponse(
+                message="Error creating demo beneficiary",
                 details=str(e)
             ).dict()
         )
