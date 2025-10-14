@@ -3,7 +3,7 @@
  * Provides navigation and user controls across all pages
  */
 
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import {
   AppBar,
   Toolbar,
@@ -14,25 +14,21 @@ import {
   Menu,
   MenuItem,
   IconButton,
-  Chip,
-  Tooltip
+  Chip
 } from '@mui/material';
 import {
   AccountCircle,
-  ExitToApp,
-  Build
+  ExitToApp
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
-import UserContext from '../contexts/UserContext';
-import DevRoleSwitcher from './DevRoleSwitcher';
+import { useUserContext } from '../contexts/UserContext';
 
 const NavigationBar = () => {
   const navigate = useNavigate();
   const { user: clerkUser, signOut } = useUser();
-  const { user } = useContext(UserContext);
+  const { dbUser: user, userRole, userDisplayName } = useUserContext();
   const [anchorEl, setAnchorEl] = useState(null);
-  const [showRoleSwitcher, setShowRoleSwitcher] = useState(false);
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -44,7 +40,8 @@ const NavigationBar = () => {
 
   const handleSignOut = async () => {
     await signOut();
-    localStorage.removeItem('zenith_user');
+    // remove persisted dev role
+    localStorage.removeItem('zenith_user_role');
     navigate('/');
     handleMenuClose();
   };
@@ -95,27 +92,16 @@ const NavigationBar = () => {
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               {/* Role Indicator */}
               <Chip
-                label={getRoleDisplay(user?.role || 'beneficiary')}
-                color={getRoleColor(user?.role || 'beneficiary')}
+                label={getRoleDisplay(userRole || user?.role || 'beneficiary')}
+                color={getRoleColor(userRole || user?.role || 'beneficiary')}
                 size="small"
                 sx={{ color: 'white' }}
               />
 
-              {/* Development Role Switcher Button */}
-              <Tooltip title="Switch Role (Development)">
-                <IconButton
-                  color="inherit"
-                  onClick={() => setShowRoleSwitcher(true)}
-                  sx={{ color: 'warning.light' }}
-                >
-                  <Build />
-                </IconButton>
-              </Tooltip>
-
               {/* User Menu */}
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Typography variant="body2">
-                  {clerkUser.firstName} {clerkUser.lastName}
+                  {userDisplayName || `${clerkUser.firstName} ${clerkUser.lastName}`}
                 </Typography>
                 
                 <IconButton
@@ -172,22 +158,11 @@ const NavigationBar = () => {
           Profile
         </MenuItem>
         
-        <MenuItem onClick={() => setShowRoleSwitcher(true)}>
-          <Build sx={{ mr: 2 }} />
-          Switch Role (Dev)
-        </MenuItem>
-        
         <MenuItem onClick={handleSignOut}>
           <ExitToApp sx={{ mr: 2 }} />
           Sign Out
         </MenuItem>
       </Menu>
-
-      {/* Development Role Switcher Dialog */}
-      <DevRoleSwitcher
-        open={showRoleSwitcher}
-        onClose={() => setShowRoleSwitcher(false)}
-      />
     </>
   );
 };

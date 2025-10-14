@@ -3,7 +3,7 @@
  * TEMPORARY: Only for testing - remove in production
  */
 
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -18,11 +18,16 @@ import {
   Alert,
   Box
 } from '@mui/material';
-import UserContext from '../contexts/UserContext';
+import { useUserContext } from '../contexts/UserContext';
 
 const DevRoleSwitcher = ({ open, onClose }) => {
-  const { user, updateUserRole } = useContext(UserContext);
-  const [selectedRole, setSelectedRole] = useState(user?.role || 'beneficiary');
+  const {
+    dbUser: user,
+    updateUserRole,
+    refreshUser,
+  } = useUserContext();
+
+  const [selectedRole, setSelectedRole] = useState(user?.role || localStorage.getItem('zenith_user_role') || 'beneficiary');
 
   const roles = [
     { value: 'admin', label: 'Admin - System Administrator' },
@@ -35,14 +40,20 @@ const DevRoleSwitcher = ({ open, onClose }) => {
   const handleRoleChange = () => {
     // Update the user context with new role
     updateUserRole(selectedRole);
-    
-    // For demo purposes, we'll update localStorage as well
-    const updatedUser = { ...user, role: selectedRole };
-    localStorage.setItem('zenith_user', JSON.stringify(updatedUser));
-    
-    // Refresh the page to apply role changes
-    window.location.reload();
-    
+
+    // Persist role in localStorage using the key expected by UserContext
+    localStorage.setItem('zenith_user_role', selectedRole);
+
+    // Try to refresh user data from backend/context without full reload
+    if (typeof refreshUser === 'function') {
+      // best-effort refresh; if it fails the UI will still reflect updateUserRole
+      try {
+        refreshUser();
+      } catch (e) {
+        // ignore
+      }
+    }
+
     onClose();
   };
 

@@ -920,13 +920,22 @@ async def get_score_history(beneficiary_id: str, limit: int = 10):
     Get credit score history for a beneficiary.
     
     Args:
-        beneficiary_id: UUID of the beneficiary
+        beneficiary_id: UUID of the beneficiary (or demo ID)
         limit: Number of historical records to return
         
     Returns:
         List of historical scores with timestamps and explanations
     """
     try:
+        # Handle demo beneficiary IDs (they don't have history in DB)
+        if beneficiary_id.startswith('demo-'):
+            logger.info(f"Demo beneficiary {beneficiary_id} requested - returning empty history")
+            return {
+                "beneficiary_id": beneficiary_id,
+                "total_records": 0,
+                "history": []
+            }
+        
         history = await score_repo.get_score_history(beneficiary_id, limit)
         
         # Format the response

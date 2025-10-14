@@ -163,8 +163,8 @@ export const DashboardRedirect = () => {
     case 'auditor':
       return <Navigate to="/auditor/dashboard" replace />;
     default:
-      // Default to beneficiary dashboard for unknown roles
-      return <Navigate to="/beneficiary/dashboard" replace />;
+      // Default to legacy dashboard for unknown/guest roles to avoid accidental beneficiary routing
+      return <Navigate to="/legacy-dashboard" replace />;
   }
 };
 

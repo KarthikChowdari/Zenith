@@ -58,13 +58,17 @@ export const UserProvider = ({ children }) => {
           } catch (apiError) {
             // If backend is not available or user sync fails, create a temporary user
             console.warn('Backend sync failed, using temporary user:', apiError.message);
+
+            // Try to preserve a developer-overridden role if present in localStorage
+            const persistedRole = localStorage.getItem('zenith_user_role');
+
             setDbUser({
               id: user.id,
               clerk_user_id: user.id,
               email: user.primaryEmailAddress?.emailAddress,
               first_name: user.firstName || '',
               last_name: user.lastName || '',
-              role: 'beneficiary', // Default role
+              role: persistedRole || 'guest', // Use persisted dev role or 'guest' to avoid forcing beneficiary
               permissions: [],
               is_active: true,
               created_at: new Date().toISOString(),
