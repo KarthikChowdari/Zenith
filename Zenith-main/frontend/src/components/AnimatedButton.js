@@ -1,5 +1,5 @@
 /**
- * AnimatedButton Component
+ * AnimatedBueafeaftton Component
  * Enhanced button with smooth animations and ripple effects
  */
 
