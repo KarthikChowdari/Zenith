@@ -604,7 +604,7 @@ const LandingPage = () => {
               </Typography>
             </Box>
             <Typography variant="body2" sx={{ opacity: 0.8 }}>
-              © 2024 Project Zenith. Powered by AI & Machine Learning
+              © 2025 Project Zenith. Powered by AI & Machine Learning
             </Typography>
             <Typography variant="body2" sx={{ opacity: 0.8 }}>
               Built for Social Impact & Financial Inclusion
