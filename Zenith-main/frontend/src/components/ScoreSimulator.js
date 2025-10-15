@@ -3,7 +3,7 @@
  * The "killer feature" - Interactive "What-If" tool for score simulation
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
@@ -27,9 +27,11 @@ import {
   Calculate,
   Lightbulb,
   Timeline,
+  Refresh,
 } from '@mui/icons-material';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { simulateScore } from '../api/api';
+import { motion } from 'framer-motion';
 
 const ScoreSimulator = ({ currentData, currentScore }) => {
   const [hypotheticalChanges, setHypotheticalChanges] = useState({});
@@ -302,49 +304,116 @@ const ScoreSimulator = ({ currentData, currentScore }) => {
   };
   
   return (
-    <Paper elevation={3} sx={{ p: 3, height: '100%' }}>
-      <Typography variant="h6" gutterBottom color="primary" fontWeight="bold">
-        <Calculate sx={{ verticalAlign: 'middle', mr: 1 }} />
-        Zenith Score Simulator
-      </Typography>
+    <Paper 
+      elevation={0}
+      sx={{ 
+        p: 3, 
+        height: '100%',
+        background: 'rgba(255, 255, 255, 0.9)',
+        backdropFilter: 'blur(10px)',
+        border: '1px solid rgba(102, 126, 234, 0.1)',
+        borderRadius: '16px',
+      }}
+    >
+      <Box sx={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        gap: 1,
+        mb: 2,
+      }}>
+        <Box
+          sx={{
+            width: 40,
+            height: 40,
+            borderRadius: '12px',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Calculate sx={{ color: 'white', fontSize: 24 }} />
+        </Box>
+        <Typography variant="h6" color="primary" fontWeight="bold">
+          Zenith Score Simulator
+        </Typography>
+      </Box>
       
-      <Typography variant="body2" color="textSecondary" paragraph>
+      <Typography variant="body2" color="textSecondary" paragraph textAlign="center">
         See how future positive actions can improve your credit score
       </Typography>
       
-      <Divider sx={{ mb: 3 }} />
+      <Divider sx={{ mb: 3, opacity: 0.3 }} />
       
       {/* Quick Improvement Suggestions */}
       {improvementSuggestions.length > 0 && (
         <Box mb={3}>
-          <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-            <Lightbulb sx={{ verticalAlign: 'middle', mr: 1 }} />
-            Quick Suggestions
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+            <Lightbulb sx={{ color: 'warning.main', fontSize: 20 }} />
+            <Typography variant="subtitle2" fontWeight="bold">
+              Quick Suggestions
+            </Typography>
+          </Box>
           
-          <Grid container spacing={1}>
+          <Grid container spacing={1.5}>
             {improvementSuggestions.map((suggestion, index) => (
               <Grid item xs={12} key={index}>
-                <Card variant="outlined" sx={{ cursor: 'pointer' }} onClick={() => applySuggestion(suggestion)}>
-                  <CardContent sx={{ py: 1.5, '&:last-child': { pb: 1.5 } }}>
-                    <Box display="flex" justifyContent="space-between" alignItems="center">
-                      <Box>
-                        <Typography variant="body2" fontWeight="bold">
-                          {suggestion.title}
-                        </Typography>
-                        <Typography variant="caption" color="textSecondary">
-                          {suggestion.description}
-                        </Typography>
+                <motion.div
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <Card 
+                    sx={{ 
+                      cursor: 'pointer',
+                      border: '1px solid rgba(102, 126, 234, 0.2)',
+                      background: 'rgba(255, 255, 255, 0.8)',
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                      '&:hover': {
+                        transform: 'translateX(8px)',
+                        boxShadow: '0 4px 12px rgba(102, 126, 234, 0.15)',
+                        borderColor: 'primary.main',
+                      }
+                    }} 
+                    onClick={() => applySuggestion(suggestion)}
+                  >
+                    <CardContent sx={{ py: 1.5, '&:last-child': { pb: 1.5 } }}>
+                      <Box display="flex" justifyContent="space-between" alignItems="center">
+                        <Box flex={1}>
+                          <Typography variant="body2" fontWeight="bold">
+                            {suggestion.title}
+                          </Typography>
+                          <Typography variant="caption" color="textSecondary">
+                            {suggestion.description}
+                          </Typography>
+                        </Box>
+                        <Chip
+                          label={suggestion.impact}
+                          size="small"
+                          sx={{
+                            bgcolor: suggestion.impact === 'High' 
+                              ? 'rgba(244, 67, 54, 0.1)' 
+                              : suggestion.impact === 'Medium' 
+                              ? 'rgba(255, 152, 0, 0.1)' 
+                              : 'rgba(76, 175, 80, 0.1)',
+                            color: suggestion.impact === 'High' 
+                              ? 'error.main' 
+                              : suggestion.impact === 'Medium' 
+                              ? 'warning.main' 
+                              : 'success.main',
+                            fontWeight: 700,
+                            border: `1px solid ${suggestion.impact === 'High' 
+                              ? 'rgba(244, 67, 54, 0.3)' 
+                              : suggestion.impact === 'Medium' 
+                              ? 'rgba(255, 152, 0, 0.3)' 
+                              : 'rgba(76, 175, 80, 0.3)'}`,
+                          }}
+                        />
                       </Box>
-                      <Chip
-                        label={suggestion.impact}
-                        size="small"
-                        color={suggestion.impact === 'High' ? 'error' : suggestion.impact === 'Medium' ? 'warning' : 'default'}
-                        variant="outlined"
-                      />
-                    </Box>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                </motion.div>
               </Grid>
             ))}
           </Grid>
@@ -462,6 +531,23 @@ const ScoreSimulator = ({ currentData, currentScore }) => {
           onClick={handleSimulate}
           disabled={loading || Object.keys(hypotheticalChanges).length === 0}
           startIcon={loading ? <CircularProgress size={20} /> : <TrendingUp />}
+          sx={{
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white',
+            fontWeight: 600,
+            px: 3,
+            py: 1.5,
+            borderRadius: '12px',
+            textTransform: 'none',
+            boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
+            '&:hover': {
+              background: 'linear-gradient(135deg, #5568d3 0%, #653a8b 100%)',
+              boxShadow: '0 6px 16px rgba(102, 126, 234, 0.4)',
+            },
+            '&:disabled': {
+              background: 'rgba(0, 0, 0, 0.12)',
+            }
+          }}
         >
           {loading ? 'Simulating...' : 'Simulate New Score'}
         </Button>
@@ -470,6 +556,20 @@ const ScoreSimulator = ({ currentData, currentScore }) => {
           variant="outlined"
           onClick={resetSimulation}
           disabled={loading}
+          startIcon={<Refresh />}
+          sx={{
+            borderColor: 'rgba(102, 126, 234, 0.5)',
+            color: 'primary.main',
+            fontWeight: 600,
+            px: 3,
+            py: 1.5,
+            borderRadius: '12px',
+            textTransform: 'none',
+            '&:hover': {
+              borderColor: 'primary.main',
+              background: 'rgba(102, 126, 234, 0.05)',
+            }
+          }}
         >
           Reset
         </Button>
@@ -477,98 +577,188 @@ const ScoreSimulator = ({ currentData, currentScore }) => {
       
       {/* Error Display */}
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <Alert 
+            severity="error" 
+            sx={{ 
+              mb: 2,
+              borderRadius: '12px',
+              border: '1px solid rgba(244, 67, 54, 0.3)',
+            }}
+          >
+            {error}
+          </Alert>
+        </motion.div>
       )}
       
       {/* Results Display */}
       {projectedScore !== null && (
-        <Box>
-          <Divider sx={{ mb: 2 }} />
-          
-          {/* Score Change Summary */}
-          <Grid container spacing={2} mb={3}>
-            <Grid item xs={4}>
-              <Box textAlign="center" p={2} bgcolor="grey.50" borderRadius={1}>
-                <Typography variant="h6" fontWeight="bold">
-                  {currentScore}
-                </Typography>
-                <Typography variant="caption" color="textSecondary">
-                  Current Score
-                </Typography>
-              </Box>
-            </Grid>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Box>
+            <Divider sx={{ mb: 3, opacity: 0.3 }} />
             
-            <Grid item xs={4}>
-              <Box textAlign="center" p={2} bgcolor={scoreChange >= 0 ? 'success.50' : 'error.50'} borderRadius={1}>
-                <Typography variant="h6" fontWeight="bold" color={scoreChange >= 0 ? 'success.main' : 'error.main'}>
-                  {scoreChange >= 0 ? '+' : ''}{scoreChange}
-                </Typography>
-                <Typography variant="caption" color="textSecondary">
-                  Score Change
-                </Typography>
-              </Box>
-            </Grid>
-            
-            <Grid item xs={4}>
-              <Box textAlign="center" p={2} bgcolor="primary.50" borderRadius={1}>
-                <Typography variant="h6" fontWeight="bold" color="primary.main">
-                  {projectedScore}
-                </Typography>
-                <Typography variant="caption" color="textSecondary">
-                  Projected Score
-                </Typography>
-              </Box>
-            </Grid>
-          </Grid>
-          
-          {/* Score Journey Chart */}
-          {chartData.length > 0 && (
-            <Box mb={3}>
-              <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-                <Timeline sx={{ verticalAlign: 'middle', mr: 1 }} />
-                Score Journey
-              </Typography>
+            {/* Score Change Summary */}
+            <Grid container spacing={2} mb={3}>
+              <Grid item xs={4}>
+                <Box 
+                  textAlign="center" 
+                  p={2.5}
+                  sx={{
+                    background: 'rgba(102, 126, 234, 0.05)',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(102, 126, 234, 0.2)',
+                  }}
+                >
+                  <Typography variant="h5" fontWeight="bold" color="text.primary">
+                    {currentScore}
+                  </Typography>
+                  <Typography variant="caption" color="textSecondary" fontWeight={600}>
+                    Current Score
+                  </Typography>
+                </Box>
+              </Grid>
               
-              <Box height={200}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis domain={[300, 900]} />
-                    <Tooltip />
-                    <Line
-                      type="monotone"
-                      dataKey="score"
-                      stroke="#1976d2"
-                      strokeWidth={3}
-                      dot={{ fill: '#1976d2', strokeWidth: 2, r: 6 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+              <Grid item xs={4}>
+                <Box 
+                  textAlign="center" 
+                  p={2.5}
+                  sx={{
+                    background: scoreChange >= 0 
+                      ? 'linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(76, 175, 80, 0.05) 100%)'
+                      : 'linear-gradient(135deg, rgba(244, 67, 54, 0.1) 0%, rgba(244, 67, 54, 0.05) 100%)',
+                    borderRadius: '12px',
+                    border: scoreChange >= 0 
+                      ? '1px solid rgba(76, 175, 80, 0.3)'
+                      : '1px solid rgba(244, 67, 54, 0.3)',
+                  }}
+                >
+                  <Typography 
+                    variant="h5" 
+                    fontWeight="bold" 
+                    color={scoreChange >= 0 ? 'success.main' : 'error.main'}
+                  >
+                    {scoreChange >= 0 ? '+' : ''}{scoreChange}
+                  </Typography>
+                  <Typography variant="caption" color="textSecondary" fontWeight={600}>
+                    Score Change
+                  </Typography>
+                </Box>
+              </Grid>
+              
+              <Grid item xs={4}>
+                <Box 
+                  textAlign="center" 
+                  p={2.5}
+                  sx={{
+                    background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(102, 126, 234, 0.3)',
+                  }}
+                >
+                  <Typography 
+                    variant="h5" 
+                    fontWeight="bold"
+                    sx={{
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      backgroundClip: 'text',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                    }}
+                  >
+                    {projectedScore}
+                  </Typography>
+                  <Typography variant="caption" color="textSecondary" fontWeight={600}>
+                    Projected Score
+                  </Typography>
+                </Box>
+              </Grid>
+            </Grid>
+            
+            {/* Score Journey Chart */}
+            {chartData.length > 0 && (
+              <Box 
+                mb={3}
+                p={2.5}
+                sx={{
+                  background: 'rgba(255, 255, 255, 0.5)',
+                  borderRadius: '12px',
+                  border: '1px solid rgba(102, 126, 234, 0.1)',
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                  <Timeline sx={{ color: 'primary.main' }} />
+                  <Typography variant="subtitle2" fontWeight="bold">
+                    Score Journey
+                  </Typography>
+                </Box>
+                
+                <Box height={200}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(102, 126, 234, 0.2)" />
+                      <XAxis 
+                        dataKey="month"
+                        stroke="#667eea"
+                        style={{ fontSize: '12px' }}
+                      />
+                      <YAxis 
+                        domain={[300, 900]}
+                        stroke="#667eea"
+                        style={{ fontSize: '12px' }}
+                      />
+                      <Tooltip 
+                        contentStyle={{
+                          background: 'rgba(255, 255, 255, 0.95)',
+                          border: '1px solid rgba(102, 126, 234, 0.3)',
+                          borderRadius: '8px',
+                        }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="score"
+                        stroke="url(#scoreGradient)"
+                        strokeWidth={3}
+                        dot={{ fill: '#667eea', strokeWidth: 2, r: 6 }}
+                      />
+                      <defs>
+                        <linearGradient id="scoreGradient" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="0%" stopColor="#667eea" />
+                          <stop offset="100%" stopColor="#764ba2" />
+                        </linearGradient>
+                      </defs>
+                    </LineChart>
+                  </ResponsiveContainer>
+                </Box>
               </Box>
-            </Box>
-          )}
-          
-          {/* AI Explanation */}
-          {explanation && (
-            <Box
-              p={2}
-              bgcolor="primary.50"
-              borderRadius={1}
-              border="1px solid"
-              borderColor="primary.200"
-            >
-              <Typography variant="subtitle2" fontWeight="bold" gutterBottom color="primary">
-                AI Analysis
-              </Typography>
-              <Typography variant="body2" lineHeight={1.6}>
-                {explanation}
-              </Typography>
-            </Box>
-          )}
-        </Box>
+            )}
+            
+            {/* AI Explanation */}
+            {explanation && (
+              <Box
+                p={2.5}
+                sx={{
+                  background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)',
+                  borderRadius: '12px',
+                  border: '1px solid rgba(102, 126, 234, 0.2)',
+                }}
+              >
+                <Typography variant="subtitle2" fontWeight="bold" gutterBottom color="primary">
+                  🤖 AI Analysis
+                </Typography>
+                <Typography variant="body2" lineHeight={1.7} color="text.secondary">
+                  {explanation}
+                </Typography>
+              </Box>
+            )}
+          </Box>
+        </motion.div>
       )}
     </Paper>
   );

@@ -6,6 +6,8 @@
 import React from 'react';
 import { Box, Typography, Paper, Grid, Chip } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import { motion } from 'framer-motion';
+import AssessmentIcon from '@mui/icons-material/Assessment';
 
 const MatrixCell = styled(Paper)(({ theme, isActive, cellColor }) => ({
   padding: theme.spacing(2),
@@ -15,13 +17,18 @@ const MatrixCell = styled(Paper)(({ theme, isActive, cellColor }) => ({
   flexDirection: 'column',
   justifyContent: 'center',
   alignItems: 'center',
-  border: isActive ? `3px solid ${cellColor}` : `1px solid ${theme.palette.divider}`,
-  backgroundColor: isActive ? `${cellColor}20` : theme.palette.background.paper,
-  transition: 'all 0.3s ease',
+  border: isActive ? `3px solid ${cellColor}` : `1px solid rgba(102, 126, 234, 0.2)`,
+  backgroundColor: isActive ? `${cellColor}20` : 'rgba(255, 255, 255, 0.5)',
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
   cursor: 'default',
+  borderRadius: '12px',
+  backdropFilter: 'blur(10px)',
   '&:hover': {
     elevation: isActive ? 8 : 2,
-    transform: isActive ? 'scale(1.02)' : 'none',
+    transform: isActive ? 'scale(1.05)' : 'scale(1.02)',
+    boxShadow: isActive 
+      ? `0 8px 24px ${cellColor}40` 
+      : '0 4px 12px rgba(102, 126, 234, 0.15)',
   },
 }));
 
@@ -123,28 +130,67 @@ const RiskMatrix = ({ riskCategory, score }) => {
   };
   
   return (
-    <Paper elevation={3} sx={{ p: 3, height: '100%' }}>
-      <Typography variant="h6" gutterBottom color="primary" fontWeight="bold">
-        Risk & Need Assessment
-      </Typography>
+    <Paper 
+      elevation={0}
+      sx={{ 
+        p: 3, 
+        height: '100%',
+        background: 'rgba(255, 255, 255, 0.9)',
+        backdropFilter: 'blur(10px)',
+        border: '1px solid rgba(102, 126, 234, 0.1)',
+        borderRadius: '16px',
+      }}
+    >
+      <Box sx={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        gap: 1,
+        mb: 2,
+      }}>
+        <Box
+          sx={{
+            width: 40,
+            height: 40,
+            borderRadius: '12px',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <AssessmentIcon sx={{ color: 'white', fontSize: 24 }} />
+        </Box>
+        <Typography variant="h6" color="primary" fontWeight="bold">
+          Risk & Need Assessment
+        </Typography>
+      </Box>
       
       {/* Current category display */}
       <Box mb={3} textAlign="center">
         {currentCategory && (
-          <Chip
-            label={currentCategory.label}
-            sx={{
-              backgroundColor: currentCategory.color,
-              color: 'white',
-              fontWeight: 'bold',
-              fontSize: '0.9rem',
-              px: 2,
-              py: 1,
-            }}
-          />
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
+          >
+            <Chip
+              label={currentCategory.label}
+              sx={{
+                backgroundColor: currentCategory.color,
+                color: 'white',
+                fontWeight: 700,
+                fontSize: '0.95rem',
+                px: 3,
+                py: 2.5,
+                height: 'auto',
+                boxShadow: `0 4px 12px ${currentCategory.color}40`,
+              }}
+            />
+          </motion.div>
         )}
         
-        <Typography variant="body2" color="textSecondary" mt={1}>
+        <Typography variant="body2" color="textSecondary" mt={2} fontWeight={500}>
           {riskCategory}
         </Typography>
       </Box>
@@ -262,16 +308,17 @@ const RiskMatrix = ({ riskCategory, score }) => {
       {/* Recommendation */}
       <Box 
         mt={2} 
-        p={2} 
-        bgcolor="grey.50" 
-        borderRadius={1}
-        border="1px solid"
-        borderColor="grey.200"
+        p={2.5}
+        sx={{
+          background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)',
+          borderRadius: '12px',
+          border: '1px solid rgba(102, 126, 234, 0.2)',
+        }}
       >
-        <Typography variant="body2" fontWeight="bold" gutterBottom>
-          Recommendation:
+        <Typography variant="body2" fontWeight="bold" gutterBottom color="primary">
+          📋 Recommendation:
         </Typography>
-        <Typography variant="body2" color="textSecondary">
+        <Typography variant="body2" color="textSecondary" sx={{ lineHeight: 1.6 }}>
           {getRecommendation()}
         </Typography>
       </Box>

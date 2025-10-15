@@ -1,9 +1,10 @@
 /**
- * Navigation Bar Component for Project Zenith
- * Provides navigation and user controls across all pages
+ * Enhanced Navigation Bar Component for Project Zenith
+ * Modern navigation with gradient styling and smooth animations
  */
 
 import React, { useState, useContext } from 'react';
+import { motion } from 'framer-motion';
 import {
   AppBar,
   Toolbar,
@@ -14,11 +15,12 @@ import {
   Menu,
   MenuItem,
   IconButton,
-  Chip
+  Chip,
 } from '@mui/material';
 import {
   AccountCircle,
-  ExitToApp
+  ExitToApp,
+  Dashboard as DashboardIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useUser, useClerk } from '@clerk/clerk-react';
@@ -51,63 +53,115 @@ const NavigationBar = () => {
     handleMenuClose();
   };
 
-  const getRoleColor = (role) => {
-    return 'success';
-  };
-
   const getRoleDisplay = (role) => {
     return 'Beneficiary';
   };
 
   return (
     <>
-      <AppBar position="static" sx={{ bgcolor: 'primary.main' }}>
-        <Toolbar>
+      <AppBar 
+        position="sticky" 
+        elevation={0}
+        sx={{
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          backdropFilter: 'blur(20px)',
+          borderBottom: '1px solid rgba(255,255,255,0.1)',
+        }}
+      >
+        <Toolbar sx={{ py: 1 }}>
           {/* Logo and Title */}
-          <Typography
-            variant="h6"
-            component="div"
-            sx={{ flexGrow: 1, cursor: 'pointer' }}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+            style={{ display: 'flex', alignItems: 'center', flexGrow: 1, cursor: 'pointer' }}
             onClick={() => navigate('/')}
           >
-            🎯 Project Zenith
-          </Typography>
+            <Box
+              sx={{
+                width: 40,
+                height: 40,
+                borderRadius: 2,
+                background: 'rgba(255, 255, 255, 0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mr: 2,
+              }}
+            >
+              <DashboardIcon sx={{ color: 'white' }} />
+            </Box>
+            <Typography
+              variant="h6"
+              component="div"
+              sx={{ 
+                fontWeight: 700,
+                color: 'white',
+              }}
+            >
+              Project Zenith
+            </Typography>
+          </motion.div>
 
           {/* User Info and Controls */}
           {clerkUser && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              {/* Role Indicator */}
-              <Chip
-                label={getRoleDisplay(user?.role || 'beneficiary')}
-                color={getRoleColor(user?.role || 'beneficiary')}
-                size="small"
-                sx={{ color: 'white' }}
-              />
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                {/* Role Indicator */}
+                <Chip
+                  label={getRoleDisplay(user?.role || 'beneficiary')}
+                  sx={{
+                    bgcolor: 'rgba(255, 255, 255, 0.2)',
+                    color: 'white',
+                    fontWeight: 600,
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                  }}
+                  size="small"
+                />
 
-              {/* User Menu */}
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography variant="body2">
-                  {clerkUser.firstName} {clerkUser.lastName}
-                </Typography>
-                
-                <IconButton
-                  size="large"
-                  aria-label="account of current user"
-                  aria-controls="menu-appbar"
-                  aria-haspopup="true"
-                  onClick={handleMenuOpen}
-                  color="inherit"
-                >
-                  <Avatar
-                    src={clerkUser.imageUrl}
-                    alt={clerkUser.firstName}
-                    sx={{ width: 32, height: 32 }}
+                {/* User Menu */}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography 
+                    variant="body2"
+                    sx={{ 
+                      color: 'white',
+                      display: { xs: 'none', sm: 'block' },
+                      fontWeight: 500,
+                    }}
                   >
-                    <AccountCircle />
-                  </Avatar>
-                </IconButton>
+                    {clerkUser.firstName} {clerkUser.lastName}
+                  </Typography>
+                  
+                  <IconButton
+                    size="large"
+                    aria-label="account of current user"
+                    aria-controls="menu-appbar"
+                    aria-haspopup="true"
+                    onClick={handleMenuOpen}
+                    sx={{
+                      color: 'white',
+                      bgcolor: 'rgba(255, 255, 255, 0.1)',
+                      '&:hover': {
+                        bgcolor: 'rgba(255, 255, 255, 0.2)',
+                      },
+                    }}
+                  >
+                    <Avatar
+                      src={clerkUser.imageUrl}
+                      alt={clerkUser.firstName}
+                      sx={{ width: 32, height: 32 }}
+                    >
+                      <AccountCircle />
+                    </Avatar>
+                  </IconButton>
+                </Box>
               </Box>
-            </Box>
+            </motion.div>
           )}
 
           {/* Login Button for non-authenticated users */}

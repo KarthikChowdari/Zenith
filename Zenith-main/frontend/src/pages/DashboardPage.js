@@ -1,15 +1,15 @@
 /**
- * DashboardPage Component for Project Zenith
- * Main dashboard with two-column layout showcasing all features
+ * Enhanced DashboardPage Component for Project Zenith
+ * Modern dashboard with animated cards and improved layout
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import {
   Box,
   Container,
   Grid,
   Typography,
-  Button,
   Alert,
   CircularProgress,
   FormControl,
@@ -20,13 +20,14 @@ import {
   Toolbar,
   Paper,
   Chip,
+  Stack,
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
   MonetizationOn,
   Refresh,
   Person,
-  Logout,
+  TrendingUp,
 } from '@mui/icons-material';
 import { useUser, UserButton } from '@clerk/clerk-react';
 
@@ -35,6 +36,9 @@ import ScoreGauge from '../components/ScoreGauge';
 import RiskMatrix from '../components/RiskMatrix';
 import BeneficiaryProfile from '../components/BeneficiaryProfile';
 import ScoreSimulator from '../components/ScoreSimulator';
+import AnimatedCard from '../components/AnimatedCard';
+import AnimatedButton from '../components/AnimatedButton';
+import LoadingScreen from '../components/LoadingScreen';
 
 // Import API functions
 import { getBeneficiary, getAllBeneficiaries } from '../api/api';
@@ -129,38 +133,84 @@ const DashboardPage = () => {
   };
   
   return (
-    <Box sx={{ flexGrow: 1, minHeight: '100vh', bgcolor: 'grey.50' }}>
-      {/* App Bar */}
-      <AppBar position="static" elevation={2}>
-        <Toolbar>
-          <DashboardIcon sx={{ mr: 2 }} />
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
-            Project Zenith - Dynamic Credit Scoring Dashboard
-          </Typography>
+    <Box sx={{ flexGrow: 1, minHeight: '100vh', bgcolor: 'background.default' }}>
+      {/* Modern App Bar */}
+      <AppBar 
+        position="sticky" 
+        elevation={0}
+        sx={{
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          borderBottom: '1px solid rgba(255,255,255,0.1)',
+        }}
+      >
+        <Toolbar sx={{ py: 1 }}>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+            style={{ display: 'flex', alignItems: 'center' }}
+          >
+            <Box
+              sx={{
+                width: 40,
+                height: 40,
+                borderRadius: 2,
+                background: 'rgba(255, 255, 255, 0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mr: 2,
+              }}
+            >
+              <DashboardIcon sx={{ color: 'white' }} />
+            </Box>
+            <Typography variant="h6" component="div" sx={{ fontWeight: 700, color: 'white' }}>
+              Credit Scoring Dashboard
+            </Typography>
+          </motion.div>
+          
+          <Box sx={{ flexGrow: 1 }} />
           
           {/* User Welcome Message */}
           {user && (
-            <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
-              <Typography variant="body2" sx={{ mr: 2 }}>
-                Welcome, {user.firstName || user.emailAddresses[0]?.emailAddress}
-              </Typography>
-            </Box>
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                mr: 2, 
+                color: 'rgba(255,255,255,0.9)',
+                display: { xs: 'none', md: 'block' }
+              }}
+            >
+              Welcome, {user.firstName || user.emailAddresses[0]?.emailAddress}
+            </Typography>
           )}
           
           {/* Beneficiary Selector */}
-          <FormControl variant="outlined" sx={{ minWidth: 200, mr: 2 }}>
-            <InputLabel sx={{ color: 'white' }}>Select Beneficiary</InputLabel>
+          <FormControl 
+            variant="outlined" 
+            size="small"
+            sx={{ 
+              minWidth: 200, 
+              mr: 2,
+              display: { xs: 'none', sm: 'block' }
+            }}
+          >
+            <InputLabel sx={{ color: 'rgba(255,255,255,0.9)' }}>Select Beneficiary</InputLabel>
             <Select
               value={selectedBeneficiaryId}
               onChange={handleBeneficiaryChange}
               label="Select Beneficiary"
               sx={{ 
                 color: 'white',
+                bgcolor: 'rgba(255,255,255,0.1)',
                 '& .MuiOutlinedInput-notchedOutline': {
-                  borderColor: 'rgba(255, 255, 255, 0.23)',
+                  borderColor: 'rgba(255, 255, 255, 0.3)',
                 },
                 '&:hover .MuiOutlinedInput-notchedOutline': {
                   borderColor: 'rgba(255, 255, 255, 0.5)',
+                },
+                '& .MuiSvgIcon-root': {
+                  color: 'white',
                 },
               }}
             >
@@ -170,10 +220,14 @@ const DashboardPage = () => {
                     <Person fontSize="small" />
                     Beneficiary #{beneficiary.id}
                     <Chip
-                      label={`Score: ${beneficiary.score}`}
+                      label={`${beneficiary.score}`}
                       size="small"
-                      color={beneficiary.score >= 650 ? 'success' : 'warning'}
-                      variant="outlined"
+                      sx={{
+                        bgcolor: beneficiary.score >= 650 ? '#10b981' : '#f59e0b',
+                        color: 'white',
+                        fontWeight: 600,
+                        fontSize: '0.75rem',
+                      }}
                     />
                   </Box>
                 </MenuItem>
@@ -181,22 +235,28 @@ const DashboardPage = () => {
             </Select>
           </FormControl>
           
-          <Button
-            color="inherit"
+          <AnimatedButton
             onClick={handleRefresh}
             disabled={loading}
-            startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Refresh />}
-            sx={{ mr: 2 }}
+            startIcon={loading ? <CircularProgress size={16} color="inherit" /> : <Refresh />}
+            sx={{
+              color: 'white',
+              bgcolor: 'rgba(255,255,255,0.1)',
+              '&:hover': {
+                bgcolor: 'rgba(255,255,255,0.2)',
+              },
+              mr: 2,
+            }}
           >
             Refresh
-          </Button>
+          </AnimatedButton>
           
           {/* User Button from Clerk */}
           <UserButton 
             afterSignOutUrl="/"
             appearance={{
               elements: {
-                avatarBox: "w-8 h-8",
+                avatarBox: "w-10 h-10 rounded-lg",
               },
             }}
           />
@@ -204,151 +264,276 @@ const DashboardPage = () => {
       </AppBar>
       
       {/* Main Content */}
-      <Container maxWidth="xl" sx={{ mt: 3, mb: 3 }}>
+      <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
         {/* Error Display */}
         {error && (
-          <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
-            {error}
-          </Alert>
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Alert 
+              severity="error" 
+              sx={{ 
+                mb: 3,
+                borderRadius: 3,
+                boxShadow: '0 4px 12px rgba(239, 68, 68, 0.2)',
+              }} 
+              onClose={() => setError(null)}
+            >
+              {error}
+            </Alert>
+          </motion.div>
         )}
         
         {/* Loading State */}
         {loading && (
-          <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-            <CircularProgress size={60} />
-            <Typography variant="h6" sx={{ ml: 2 }}>
-              Loading beneficiary data...
-            </Typography>
-          </Box>
+          <LoadingScreen message="Loading beneficiary data..." />
         )}
         
         {/* Dashboard Content */}
         {!loading && beneficiaryData && (
-          <Grid container spacing={3}>
-            {/* Left Column */}
-            <Grid item xs={12} lg={6}>
-              <Grid container spacing={3}>
-                {/* Beneficiary Profile */}
-                <Grid item xs={12}>
-                  <BeneficiaryProfile
-                    beneficiaryData={beneficiaryData}
-                    score={score}
-                    riskCategory={riskCategory}
-                    explanation={explanation}
-                  />
-                </Grid>
-                
-                {/* Score Gauge */}
-                <Grid item xs={12} md={6}>
-                  <ScoreGauge score={score} />
-                </Grid>
-                
-                {/* Risk Matrix */}
-                <Grid item xs={12} md={6}>
-                  <RiskMatrix riskCategory={riskCategory} score={score} />
-                </Grid>
-                
-                {/* Insta-Loan Section */}
-                <Grid item xs={12}>
-                  <Paper elevation={3} sx={{ p: 3 }}>
-                    <Typography variant="h6" gutterBottom color="primary" fontWeight="bold">
-                      <MonetizationOn sx={{ verticalAlign: 'middle', mr: 1 }} />
-                      Insta-Loan Eligibility
-                    </Typography>
-                    
-                    <Box mb={2}>
-                      <Typography variant="body2" color="textSecondary" paragraph>
-                        Instant loan approval for qualified beneficiaries based on AI assessment
-                      </Typography>
-                      
-                      <Box display="flex" alignItems="center" gap={2} mb={2}>
-                        <Typography variant="body2" fontWeight="bold">
-                          Status:
-                        </Typography>
-                        <Chip
-                          label={isInstaLoanEligible() ? 'Eligible' : 'Not Eligible'}
-                          color={isInstaLoanEligible() ? 'success' : 'error'}
-                          variant="outlined"
-                        />
-                      </Box>
-                      
-                      {isInstaLoanEligible() && (
-                        <Alert severity="success" sx={{ mb: 2 }}>
-                          <strong>Congratulations!</strong> This beneficiary qualifies for instant loan approval.
-                        </Alert>
-                      )}
-                      
-                      {!isInstaLoanEligible() && (
-                        <Alert severity="info" sx={{ mb: 2 }}>
-                          This beneficiary needs to improve their profile to qualify for instant loans.
-                          Use the simulator to see what changes would help.
-                        </Alert>
-                      )}
-                    </Box>
-                    
-                    <Button
-                      variant="contained"
-                      color="success"
-                      size="large"
-                      fullWidth
-                      disabled={!isInstaLoanEligible()}
-                      onClick={handleInstaLoan}
-                      startIcon={<MonetizationOn />}
-                      sx={{ fontWeight: 'bold' }}
-                    >
-                      {isInstaLoanEligible() ? 'Approve Insta-Loan' : 'Insta-Loan Not Available'}
-                    </Button>
-                    
-                    {isInstaLoanEligible() && (
-                      <Typography variant="caption" color="textSecondary" display="block" textAlign="center" mt={1}>
-                        Instant approval • ₹50,000 • 8.5% p.a. • 12 months
-                      </Typography>
-                    )}
-                  </Paper>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Grid container spacing={3}>
+              {/* Left Column */}
+              <Grid item xs={12} lg={6}>
+                <Grid container spacing={3}>
+                  {/* Beneficiary Profile */}
+                  <Grid item xs={12}>
+                    <AnimatedCard delay={0.1} hover>
+                      <BeneficiaryProfile
+                        beneficiaryData={beneficiaryData}
+                        score={score}
+                        riskCategory={riskCategory}
+                        explanation={explanation}
+                      />
+                    </AnimatedCard>
+                  </Grid>
+                  
+                  {/* Score Gauge */}
+                  <Grid item xs={12} md={6}>
+                    <AnimatedCard delay={0.2} hover>
+                      <ScoreGauge score={score} />
+                    </AnimatedCard>
+                  </Grid>
+                  
+                  {/* Risk Matrix */}
+                  <Grid item xs={12} md={6}>
+                    <AnimatedCard delay={0.3} hover>
+                      <RiskMatrix riskCategory={riskCategory} score={score} />
+                    </AnimatedCard>
+                  </Grid>
+                  
+                  {/* Insta-Loan Section */}
+                  <Grid item xs={12}>
+                    <AnimatedCard delay={0.4} hover={false}>
+                      <Paper 
+                        elevation={0}
+                        sx={{ 
+                          p: 3,
+                          background: isInstaLoanEligible() 
+                            ? 'linear-gradient(135deg, #10b98120 0%, #4ade8020 100%)'
+                            : 'linear-gradient(135deg, #f59e0b20 0%, #ef444420 100%)',
+                          border: '1px solid',
+                          borderColor: isInstaLoanEligible() ? '#10b981' : '#f59e0b',
+                        }}
+                      >
+                        <Stack direction="row" alignItems="center" spacing={1} mb={2}>
+                          <Box
+                            sx={{
+                              width: 48,
+                              height: 48,
+                              borderRadius: 2,
+                              background: isInstaLoanEligible()
+                                ? 'linear-gradient(135deg, #10b981 0%, #4ade80 100%)'
+                                : 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            <MonetizationOn sx={{ color: 'white', fontSize: 28 }} />
+                          </Box>
+                          <Box>
+                            <Typography variant="h6" fontWeight="bold">
+                              Insta-Loan Eligibility
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              Instant approval for qualified beneficiaries
+                            </Typography>
+                          </Box>
+                        </Stack>
+                        
+                        <Box mb={2}>
+                          <Box display="flex" alignItems="center" gap={2} mb={2}>
+                            <Typography variant="body2" fontWeight="600" color="text.secondary">
+                              Status:
+                            </Typography>
+                            <Chip
+                              label={isInstaLoanEligible() ? '✓ Eligible' : '✗ Not Eligible'}
+                              sx={{
+                                bgcolor: isInstaLoanEligible() ? '#10b981' : '#ef4444',
+                                color: 'white',
+                                fontWeight: 700,
+                                px: 1,
+                              }}
+                            />
+                          </Box>
+                          
+                          {isInstaLoanEligible() && (
+                            <motion.div
+                              initial={{ opacity: 0, scale: 0.95 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ delay: 0.2 }}
+                            >
+                              <Alert 
+                                severity="success" 
+                                sx={{ 
+                                  mb: 2,
+                                  borderRadius: 2,
+                                  border: '1px solid #10b981',
+                                }}
+                              >
+                                <strong>Congratulations!</strong> This beneficiary qualifies for instant loan approval.
+                              </Alert>
+                            </motion.div>
+                          )}
+                          
+                          {!isInstaLoanEligible() && (
+                            <Alert 
+                              severity="info" 
+                              sx={{ 
+                                mb: 2,
+                                borderRadius: 2,
+                              }}
+                            >
+                              This beneficiary needs to improve their profile to qualify.
+                              Use the simulator to see what changes would help.
+                            </Alert>
+                          )}
+                        </Box>
+                        
+                        <AnimatedButton
+                          variant="contained"
+                          size="large"
+                          fullWidth
+                          disabled={!isInstaLoanEligible()}
+                          onClick={handleInstaLoan}
+                          startIcon={<MonetizationOn />}
+                          gradient={isInstaLoanEligible()}
+                          sx={{
+                            fontWeight: 'bold',
+                            py: 1.5,
+                            background: !isInstaLoanEligible() ? '#94a3b8' : undefined,
+                          }}
+                        >
+                          {isInstaLoanEligible() ? 'Approve Insta-Loan' : 'Insta-Loan Not Available'}
+                        </AnimatedButton>
+                        
+                        {isInstaLoanEligible() && (
+                          <Typography 
+                            variant="caption" 
+                            color="text.secondary" 
+                            display="block" 
+                            textAlign="center" 
+                            mt={1}
+                            sx={{ fontWeight: 500 }}
+                          >
+                            Instant approval • ₹50,000 • 8.5% p.a. • 12 months
+                          </Typography>
+                        )}
+                      </Paper>
+                    </AnimatedCard>
+                  </Grid>
                 </Grid>
               </Grid>
+              
+              {/* Right Column - Score Simulator */}
+              <Grid item xs={12} lg={6}>
+                <AnimatedCard delay={0.5} hover={false}>
+                  <ScoreSimulator
+                    currentData={beneficiaryData}
+                    currentScore={score}
+                  />
+                </AnimatedCard>
+              </Grid>
             </Grid>
-            
-            {/* Right Column - Score Simulator */}
-            <Grid item xs={12} lg={6}>
-              <ScoreSimulator
-                currentData={beneficiaryData}
-                currentScore={score}
-              />
-            </Grid>
-          </Grid>
+          </motion.div>
         )}
         
         {/* No Data State */}
         {!loading && !beneficiaryData && !error && (
-          <Box textAlign="center" py={8}>
-            <Typography variant="h4" color="textSecondary" gutterBottom>
-              No Data Available
-            </Typography>
-            <Typography variant="body1" color="textSecondary">
-              Please select a beneficiary to view their credit profile and score simulation.
-            </Typography>
-          </Box>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Box 
+              textAlign="center" 
+              py={12}
+              sx={{
+                background: 'white',
+                borderRadius: 4,
+                boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+              }}
+            >
+              <Box
+                sx={{
+                  width: 80,
+                  height: 80,
+                  borderRadius: 3,
+                  background: 'linear-gradient(135deg, #667eea20 0%, #764ba220 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 24px',
+                }}
+              >
+                <TrendingUp sx={{ fontSize: 40, color: '#667eea' }} />
+              </Box>
+              <Typography variant="h4" fontWeight="bold" gutterBottom>
+                No Data Available
+              </Typography>
+              <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 500, mx: 'auto' }}>
+                Please select a beneficiary from the dropdown above to view their credit profile and score simulation.
+              </Typography>
+            </Box>
+          </motion.div>
         )}
       </Container>
       
-      {/* Footer */}
+      {/* Modern Footer */}
       <Box
         component="footer"
         sx={{
           py: 3,
           px: 2,
           mt: 'auto',
-          backgroundColor: 'grey.900',
+          background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
           color: 'white',
           textAlign: 'center',
         }}
       >
-        <Typography variant="body2">
-          Project Zenith - Dynamic Credit Scoring & Guidance System | 
-          Powered by AI & Machine Learning | 
-          Built for Social Impact
-        </Typography>
+        <Stack 
+          direction={{ xs: 'column', md: 'row' }} 
+          spacing={2}
+          justifyContent="center"
+          alignItems="center"
+        >
+          <Typography variant="body2" sx={{ opacity: 0.9 }}>
+            Project Zenith - Dynamic Credit Scoring & Guidance System
+          </Typography>
+          <Typography variant="body2" sx={{ opacity: 0.7 }}>
+            •
+          </Typography>
+          <Typography variant="body2" sx={{ opacity: 0.9 }}>
+            Powered by AI & Machine Learning
+          </Typography>
+        </Stack>
       </Box>
     </Box>
   );

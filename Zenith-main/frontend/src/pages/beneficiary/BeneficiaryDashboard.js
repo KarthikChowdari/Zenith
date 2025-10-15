@@ -1,9 +1,10 @@
 /**
  * Enhanced Beneficiary Dashboard for Project Zenith
- * Complete dashboard with 4-section layout as requested
+ * Modern dashboard with animated tabs and polished UI
  */
 
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import {
   Box,
   Container,
@@ -13,7 +14,6 @@ import {
   CardContent,
   Button,
   Alert,
-  CircularProgress,
   Chip,
   Paper,
   LinearProgress,
@@ -26,16 +26,13 @@ import {
   Tab,
 } from '@mui/material';
 import {
-  Person as PersonIcon,
   TrendingUp as TrendingUpIcon,
   History as HistoryIcon,
   Assessment as AssessmentIcon,
-  AccountCircle as AccountCircleIcon,
   CheckCircle as CheckCircleIcon,
   Warning as WarningIcon,
   Error as ErrorIcon,
   Timeline as TimelineIcon,
-  Home as HomeIcon,
 } from '@mui/icons-material';
 
 // Import API functions and components
@@ -47,6 +44,8 @@ import RiskMatrix from '../../components/RiskMatrix';
 import ScoreSimulator from '../../components/ScoreSimulator';
 import InstaLoanEligibility from '../../components/InstaLoanEligibility';
 import NavigationBar from '../../components/NavigationBar';
+import AnimatedCard from '../../components/AnimatedCard';
+import LoadingScreen from '../../components/LoadingScreen';
 
 // Tab panel component
 function TabPanel({ children, value, index, ...other }) {
@@ -151,15 +150,6 @@ const BeneficiaryDashboard = () => {
     setCurrentTab(newValue);
   };
 
-  const getRiskColor = (risk) => {
-    switch ((risk || '').toLowerCase()) {
-      case 'high': return 'error';
-      case 'medium': return 'warning';
-      case 'low': return 'success';
-      default: return 'default';
-    }
-  };
-
   const getScoreLevel = (score) => {
     if (score >= 750) return { level: 'Excellent', color: 'success', icon: CheckCircleIcon };
     if (score >= 700) return { level: 'Very Good', color: 'success', icon: CheckCircleIcon };
@@ -168,94 +158,208 @@ const BeneficiaryDashboard = () => {
     return { level: 'Needs Improvement', color: 'error', icon: ErrorIcon };
   };
 
-  const getScoreAdvice = (score) => {
-    if (score >= 750) return "Excellent credit score! You qualify for the best loan terms.";
-    if (score >= 700) return "Very good credit score. You're eligible for most loan products.";
-    if (score >= 650) return "Good credit score. Consider improving it for better loan terms.";
-    if (score >= 600) return "Fair credit score. Focus on building your credit history.";
-    return "Your credit score needs improvement. Follow our recommendations to boost it.";
-  };
-
   if (loading) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
-        <CircularProgress size={60} />
-      </Box>
-    );
+    return <LoadingScreen message="Loading your dashboard..." />;
   }
 
   if (error) {
     return (
-      <Container maxWidth="md" sx={{ mt: 4 }}>
-        <Alert severity="error">
-          {error}
-          <Button color="inherit" size="small" onClick={loadBeneficiaryData} sx={{ ml: 2 }}>
-            Retry
-          </Button>
-        </Alert>
-      </Container>
+      <Box 
+        display="flex" 
+        justifyContent="center" 
+        alignItems="center" 
+        minHeight="100vh"
+        sx={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}
+      >
+        <Container maxWidth="md">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Paper
+              sx={{
+                p: 4,
+                borderRadius: 4,
+                textAlign: 'center',
+                background: 'rgba(255, 255, 255, 0.95)',
+                backdropFilter: 'blur(20px)',
+              }}
+            >
+              <Box
+                sx={{
+                  width: 80,
+                  height: 80,
+                  borderRadius: 3,
+                  background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 24px',
+                }}
+              >
+                <ErrorIcon sx={{ fontSize: 48, color: 'white' }} />
+              </Box>
+              <Typography variant="h5" fontWeight="bold" gutterBottom>
+                Error Loading Dashboard
+              </Typography>
+              <Typography variant="body1" color="text.secondary" paragraph>
+                {error}
+              </Typography>
+              <Button 
+                variant="contained" 
+                onClick={loadBeneficiaryData}
+                sx={{
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  color: 'white',
+                  px: 4,
+                  py: 1.5,
+                }}
+              >
+                Try Again
+              </Button>
+            </Paper>
+          </motion.div>
+        </Container>
+      </Box>
     );
   }
 
   if (!beneficiaryData) {
     return (
-      <Container maxWidth="md" sx={{ mt: 4 }}>
-        <Alert severity="info">
-          <Typography variant="h6" gutterBottom>
-            Profile Not Found
-          </Typography>
-          <Typography>
-            We couldn't find your beneficiary profile. Please contact support to set up your account.
-          </Typography>
-        </Alert>
-      </Container>
+      <Box 
+        display="flex" 
+        justifyContent="center" 
+        alignItems="center" 
+        minHeight="100vh"
+        sx={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}
+      >
+        <Container maxWidth="md">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Paper
+              sx={{
+                p: 4,
+                borderRadius: 4,
+                textAlign: 'center',
+                background: 'rgba(255, 255, 255, 0.95)',
+                backdropFilter: 'blur(20px)',
+              }}
+            >
+              <Box
+                sx={{
+                  width: 80,
+                  height: 80,
+                  borderRadius: 3,
+                  background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 24px',
+                }}
+              >
+                <WarningIcon sx={{ fontSize: 48, color: 'white' }} />
+              </Box>
+              <Typography variant="h5" fontWeight="bold" gutterBottom>
+                Profile Not Found
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                We couldn't find your beneficiary profile. Please contact support to set up your account.
+              </Typography>
+            </Paper>
+          </motion.div>
+        </Container>
+      </Box>
     );
   }
 
   const currentScore = beneficiaryData.credit_score || 0;
   const scoreLevel = getScoreLevel(currentScore);
-  const ScoreLevelIcon = scoreLevel.icon;
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
+    <Box sx={{ flexGrow: 1, minHeight: '100vh', bgcolor: 'background.default' }}>
       {/* Navigation Bar */}
       <NavigationBar />
 
-      <Container maxWidth="xl" sx={{ mt: 3, mb: 3 }}>
+      <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
         {/* Welcome Header */}
-        <Box sx={{ mb: 4, textAlign: 'center' }}>
-          <Typography variant="h4" fontWeight="bold" color="primary" gutterBottom>
-            Welcome to Your Credit Dashboard
-          </Typography>
-          <Typography variant="subtitle1" color="textSecondary">
-            {beneficiaryData.name || `Beneficiary #${beneficiaryData.beneficiary_id}`}
-          </Typography>
-          <Chip 
-            label={`Score: ${currentScore}`} 
-            color={scoreLevel.color} 
-            size="large" 
-            sx={{ mt: 1, fontSize: '1rem', px: 2 }}
-          />
-        </Box>
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Box 
+            sx={{ 
+              mb: 4, 
+              textAlign: 'center',
+              p: 4,
+              borderRadius: 4,
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: 'white',
+              boxShadow: '0 10px 30px rgba(102, 126, 234, 0.3)',
+            }}
+          >
+            <Typography variant="h3" fontWeight="bold" gutterBottom>
+              Welcome Back!
+            </Typography>
+            <Typography variant="h6" sx={{ opacity: 0.95, mb: 2 }}>
+              {beneficiaryData.name || `Beneficiary #${beneficiaryData.beneficiary_id}`}
+            </Typography>
+            <Box display="flex" justifyContent="center" gap={2} flexWrap="wrap">
+              <Chip 
+                label={`Credit Score: ${currentScore}`}
+                sx={{
+                  fontSize: '1.1rem',
+                  px: 3,
+                  py: 2.5,
+                  height: 'auto',
+                  bgcolor: 'white',
+                  color: scoreLevel.color === 'success' ? '#10b981' : scoreLevel.color === 'warning' ? '#f59e0b' : '#ef4444',
+                  fontWeight: 700,
+                }}
+              />
+              <Chip 
+                label={scoreLevel.level}
+                sx={{
+                  fontSize: '1rem',
+                  px: 3,
+                  py: 2.5,
+                  height: 'auto',
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  color: 'white',
+                  fontWeight: 600,
+                  backdropFilter: 'blur(10px)',
+                }}
+              />
+            </Box>
+          </Box>
+        </motion.div>
 
         {/* Main Dashboard Layout */}
         
         {/* Top Row: Beneficiary Profile (Left) + Score Simulator (Right) */}
         <Grid container spacing={3} sx={{ mb: 3 }}>
           <Grid item xs={12} lg={6}>
-            <BeneficiaryProfile
-              beneficiaryData={beneficiaryData}
-              score={currentScore}
-              riskCategory={beneficiaryData?.risk_category}
-              explanation={beneficiaryData?.explanation || `This beneficiary has a credit score of ${currentScore} based on their financial history and behavior patterns. The assessment considers factors such as loan repayment history, utility bill payments, employment status, and overall financial stability.`}
-            />
+            <AnimatedCard delay={0.1} hover>
+              <BeneficiaryProfile
+                beneficiaryData={beneficiaryData}
+                score={currentScore}
+                riskCategory={beneficiaryData?.risk_category}
+                explanation={beneficiaryData?.explanation || `This beneficiary has a credit score of ${currentScore} based on their financial history and behavior patterns. The assessment considers factors such as loan repayment history, utility bill payments, employment status, and overall financial stability.`}
+              />
+            </AnimatedCard>
           </Grid>
           
           <Grid item xs={12} lg={6}>
-            <ScoreSimulator
-              currentData={beneficiaryData}
-              currentScore={currentScore}
-            />
+            <AnimatedCard delay={0.2} hover={false}>
+              <ScoreSimulator
+                currentData={beneficiaryData}
+                currentScore={currentScore}
+              />
+            </AnimatedCard>
           </Grid>
         </Grid>
 
@@ -264,31 +368,33 @@ const BeneficiaryDashboard = () => {
           <Grid item xs={12} lg={6}>
             <Grid container spacing={3} sx={{ height: '100%' }}>
               <Grid item xs={12} md={6}>
-                <Box sx={{ height: '100%' }}>
+                <AnimatedCard delay={0.3} hover>
                   <ScoreGauge 
                     score={currentScore} 
                     maxScore={900}
                     minScore={300}
                   />
-                </Box>
+                </AnimatedCard>
               </Grid>
               
               <Grid item xs={12} md={6}>
-                <Box sx={{ height: '100%' }}>
+                <AnimatedCard delay={0.4} hover>
                   <RiskMatrix
                     riskCategory={beneficiaryData?.risk_category}
                     score={beneficiaryData?.credit_score || currentScore}
                   />
-                </Box>
+                </AnimatedCard>
               </Grid>
             </Grid>
           </Grid>
           
           <Grid item xs={12} lg={6}>
-            <InstaLoanEligibility
-              beneficiaryData={beneficiaryData}
-              score={currentScore}
-            />
+            <AnimatedCard delay={0.5} hover={false}>
+              <InstaLoanEligibility
+                beneficiaryData={beneficiaryData}
+                score={currentScore}
+              />
+            </AnimatedCard>
           </Grid>
         </Grid>
 
