@@ -123,6 +123,28 @@ class UserCreateRequest(BaseModel):
     phone: Optional[str] = None
     tenant_id: Optional[str] = None
 
+class LoanApprovalRequest(BaseModel):
+    beneficiary_id: str
+    loan_amount: int
+    tenure_months: int
+    officer_id: Optional[str] = None
+    notes: Optional[str] = None
+
+class LoanApprovalResponse(BaseModel):
+    status: str
+    approved: bool
+    eligibility_score: int
+    loan_amount: int
+    max_loan_amount: int
+    interest_rate: float
+    emi: int
+    tenure_months: int
+    reasons: List[str]
+    benefits: List[str]
+    processing_time: str
+    loan_id: Optional[str] = None
+    message: str
+
 async def initialize_system():
     """Initialize the system by ensuring ML model is trained."""
     try:
@@ -1004,6 +1026,188 @@ async def get_feature_importance():
             status_code=500,
             detail=ErrorResponse(
                 message="Error getting feature importance",
+                details=str(e)
+            ).dict()
+        )
+
+@app.post("/loans/approve", response_model=LoanApprovalResponse)
+async def approve_instant_loan(request: LoanApprovalRequest):
+    """
+    Evaluate and approve/reject instant loan based on beneficiary credit score and profile.
+    
+    Uses dynamic eligibility calculation based on:
+    - Credit score (40% weight)
+    - Employment type and income (45% weight)
+    - Payment history (15% weight)
+    
+    Returns detailed loan approval decision with reasons.
+    """
+    try:
+        # Get beneficiary data
+        beneficiary = await beneficiary_repo.get_beneficiary(request.beneficiary_id)
+        if not beneficiary:
+            raise HTTPException(
+                status_code=404,
+                detail=ErrorResponse(
+                    message=f"Beneficiary {request.beneficiary_id} not found"
+                ).dict()
+            )
+        
+        # Get latest credit score
+        score = beneficiary.get('credit_score')
+        if score is None:
+            raise HTTPException(
+                status_code=400,
+                detail=ErrorResponse(
+                    message="Credit score not available for this beneficiary",
+                    details="Score must be calculated before loan approval"
+                ).dict()
+            )
+        
+        # Extract beneficiary features
+        monthly_income = beneficiary.get('monthly_income', 0)
+        employment_type = beneficiary.get('employment_type', 0)
+        loan_repayment_status = beneficiary.get('loan_repayment_status', 0)
+        electricity_bill_paid_on_time = beneficiary.get('electricity_bill_paid_on_time', 0)
+        
+        # Calculate eligibility score (0-100)
+        eligibility_score = 0
+        max_loan_amount = 0
+        interest_rate = 18.0  # Default high rate
+        reasons = []
+        benefits = []
+        
+        # Score-based eligibility (40% weightage)
+        if score >= 700:
+            eligibility_score += 40
+            max_loan_amount += 200000
+            interest_rate = 12.0
+            benefits.append('Premium interest rates due to excellent credit score')
+        elif score >= 600:
+            eligibility_score += 30
+            max_loan_amount += 150000
+            interest_rate = 15.0
+            benefits.append('Standard interest rates due to good credit score')
+        elif score >= 500:
+            eligibility_score += 20
+            max_loan_amount += 75000
+            interest_rate = 17.0
+            reasons.append('Credit score below 600 - consider improving')
+        else:
+            eligibility_score += 10
+            max_loan_amount += 25000
+            reasons.append('Low credit score requires significant improvement')
+        
+        # Employment-based eligibility (25% weightage)
+        if employment_type == 2:  # Salaried
+            eligibility_score += 25
+            max_loan_amount += monthly_income * 10
+            benefits.append('Stable salaried employment verified')
+        elif employment_type == 1:  # Self-employed
+            eligibility_score += 20
+            max_loan_amount += monthly_income * 6
+            benefits.append('Self-employment income verified')
+        else:
+            eligibility_score += 5
+            reasons.append('Employment status needs verification')
+        
+        # Income-based eligibility (20% weightage)
+        if monthly_income >= 25000:
+            eligibility_score += 20
+            max_loan_amount += 100000
+            benefits.append('High income bracket qualifies for larger loans')
+        elif monthly_income >= 15000:
+            eligibility_score += 15
+            max_loan_amount += 50000
+            benefits.append('Good income level')
+        elif monthly_income >= 10000:
+            eligibility_score += 10
+            benefits.append('Adequate income for small loans')
+        else:
+            eligibility_score += 5
+            reasons.append('Income below minimum threshold for large loans')
+        
+        # Payment history (15% weightage)
+        if loan_repayment_status == 1 and electricity_bill_paid_on_time == 1:
+            eligibility_score += 15
+            max_loan_amount += 75000
+            benefits.append('Excellent payment history on all bills')
+            interest_rate = max(interest_rate - 2, 10.0)
+        elif loan_repayment_status == 1 or electricity_bill_paid_on_time == 1:
+            eligibility_score += 10
+            benefits.append('Good payment track record')
+            interest_rate = max(interest_rate - 1, 11.0)
+        else:
+            eligibility_score += 5
+            reasons.append('Payment history needs improvement')
+        
+        # Cap maximum loan amount at 5 lakh
+        max_loan_amount = min(max_loan_amount, 500000)
+        
+        # Determine approval status
+        approved = False
+        status = 'rejected'
+        processing_time = 'N/A'
+        
+        if eligibility_score >= 80:
+            status = 'approved'
+            approved = True
+            processing_time = '24 hours'
+        elif eligibility_score >= 60:
+            status = 'conditional'
+            approved = False
+            processing_time = '3-5 days'
+            reasons.append('May require additional documentation for approval')
+        else:
+            status = 'rejected'
+            approved = False
+            reasons.append('Does not meet minimum eligibility criteria')
+        
+        # Check if requested amount is within limit
+        if request.loan_amount > max_loan_amount:
+            if status == 'approved':
+                status = 'conditional'
+                approved = False
+            reasons.append(f'Requested amount ₹{request.loan_amount:,} exceeds maximum limit of ₹{max_loan_amount:,}')
+        
+        # Calculate EMI
+        monthly_rate = interest_rate / 100 / 12
+        emi = request.loan_amount * monthly_rate * (1 + monthly_rate) ** request.tenure_months / \
+              ((1 + monthly_rate) ** request.tenure_months - 1)
+        emi = round(emi)
+        
+        # Create response message
+        if approved:
+            message = f"🎉 Instant loan approved! Amount: ₹{request.loan_amount:,} at {interest_rate}% p.a. for {request.tenure_months} months. EMI: ₹{emi:,}"
+        elif status == 'conditional':
+            message = f"Conditional approval. Additional documentation required. Max eligible: ₹{max_loan_amount:,}"
+        else:
+            message = f"Loan application does not meet eligibility criteria. Current eligibility score: {eligibility_score}/100"
+        
+        return LoanApprovalResponse(
+            status=status,
+            approved=approved,
+            eligibility_score=eligibility_score,
+            loan_amount=request.loan_amount,
+            max_loan_amount=max_loan_amount,
+            interest_rate=interest_rate,
+            emi=emi,
+            tenure_months=request.tenure_months,
+            reasons=reasons,
+            benefits=benefits,
+            processing_time=processing_time,
+            loan_id=None,  # TODO: Generate and store loan application ID
+            message=message
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error processing loan approval: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=ErrorResponse(
+                message="Error processing loan approval",
                 details=str(e)
             ).dict()
         )

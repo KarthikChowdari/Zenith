@@ -26,7 +26,6 @@ import {
   MonetizationOn,
   Refresh,
   Person,
-  Logout,
 } from '@mui/icons-material';
 import { useUser, UserButton } from '@clerk/clerk-react';
 
@@ -118,14 +117,71 @@ const DashboardPage = () => {
     }
   };
   
-  // Check if Insta-Loan should be enabled
+  // Check if Insta-Loan should be enabled (dynamic based on score and risk)
   const isInstaLoanEligible = () => {
-    return riskCategory === 'Low Risk - High Need';
+    // Eligible if score >= 500 OR risk category indicates low risk
+    return score >= 500 || riskCategory === 'Low Risk - High Need' || riskCategory === 'Low Risk - Low Need';
   };
   
-  // Handle Insta-Loan approval
-  const handleInstaLoan = () => {
-    alert(`🎉 Insta-Loan Approved for Beneficiary #${selectedBeneficiaryId}!\n\nLoan Details:\n• Amount: ₹50,000\n• Interest Rate: 8.5% p.a.\n• Tenure: 12 months\n• Processing: Instant`);
+  // Handle Insta-Loan approval with dynamic backend call
+  const handleInstaLoan = async () => {
+    if (!selectedBeneficiaryId) return;
+    
+    setLoading(true);
+    try {
+      const response = await fetch('http://localhost:8000/loans/approve', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          beneficiary_id: selectedBeneficiaryId,
+          loan_amount: 50000,  // Default amount, can be made configurable
+          tenure_months: 12,
+          officer_id: null,
+          notes: 'Instant loan approval request'
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        // Build detailed message based on response
+        let message = `${data.approved ? '🎉 ' : '⚠️ '}Loan Application Status: ${data.status.toUpperCase()}\n\n`;
+        message += `Eligibility Score: ${data.eligibility_score}/100\n\n`;
+        message += `Loan Details:\n`;
+        message += `• Requested Amount: ₹${data.loan_amount.toLocaleString()}\n`;
+        message += `• Maximum Eligible: ₹${data.max_loan_amount.toLocaleString()}\n`;
+        message += `• Interest Rate: ${data.interest_rate}% p.a.\n`;
+        message += `• Tenure: ${data.tenure_months} months\n`;
+        message += `• EMI: ₹${data.emi.toLocaleString()}/month\n`;
+        message += `• Processing Time: ${data.processing_time}\n\n`;
+        
+        if (data.benefits && data.benefits.length > 0) {
+          message += `✅ Benefits:\n`;
+          data.benefits.forEach(benefit => {
+            message += `  • ${benefit}\n`;
+          });
+          message += `\n`;
+        }
+        
+        if (data.reasons && data.reasons.length > 0) {
+          message += `${data.approved ? '📋' : '❌'} ${data.approved ? 'Notes' : 'Reasons'}:\n`;
+          data.reasons.forEach(reason => {
+            message += `  • ${reason}\n`;
+          });
+        }
+        
+        alert(message);
+      } else {
+        alert(`Error: ${data.message || 'Failed to process loan application'}`);
+      }
+    } catch (error) {
+      console.error('Error approving loan:', error);
+      alert('Failed to process loan application. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
   
   return (
@@ -274,14 +330,15 @@ const DashboardPage = () => {
                       
                       {isInstaLoanEligible() && (
                         <Alert severity="success" sx={{ mb: 2 }}>
-                          <strong>Congratulations!</strong> This beneficiary qualifies for instant loan approval.
+                          <strong>Eligible for Instant Loan!</strong> Credit score: {score}/850. 
+                          Click below to get detailed loan terms and approval decision.
                         </Alert>
                       )}
                       
                       {!isInstaLoanEligible() && (
                         <Alert severity="info" sx={{ mb: 2 }}>
-                          This beneficiary needs to improve their profile to qualify for instant loans.
-                          Use the simulator to see what changes would help.
+                          Current credit score: {score}/850. Minimum score of 500 required for instant loans.
+                          Use the simulator below to see what changes would help improve eligibility.
                         </Alert>
                       )}
                     </Box>
@@ -291,17 +348,17 @@ const DashboardPage = () => {
                       color="success"
                       size="large"
                       fullWidth
-                      disabled={!isInstaLoanEligible()}
+                      disabled={!isInstaLoanEligible() || loading}
                       onClick={handleInstaLoan}
                       startIcon={<MonetizationOn />}
                       sx={{ fontWeight: 'bold' }}
                     >
-                      {isInstaLoanEligible() ? 'Approve Insta-Loan' : 'Insta-Loan Not Available'}
+                      {loading ? 'Processing...' : isInstaLoanEligible() ? 'Evaluate Loan Eligibility' : 'Not Eligible - Score Too Low'}
                     </Button>
                     
                     {isInstaLoanEligible() && (
                       <Typography variant="caption" color="textSecondary" display="block" textAlign="center" mt={1}>
-                        Instant approval • ₹50,000 • 8.5% p.a. • 12 months
+                        Request: ₹50,000 • 12 months • Rate based on profile
                       </Typography>
                     )}
                   </Paper>

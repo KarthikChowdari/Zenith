@@ -21,12 +21,13 @@ import {
   ExitToApp
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import { useUser } from '@clerk/clerk-react';
+import { useUser, useClerk } from '@clerk/clerk-react';
 import { useUserContext } from '../contexts/UserContext';
 
 const NavigationBar = () => {
   const navigate = useNavigate();
-  const { user: clerkUser, signOut } = useUser();
+  const { user: clerkUser } = useUser();
+  const { signOut } = useClerk();
   const { dbUser: user, userRole, userDisplayName } = useUserContext();
   const [anchorEl, setAnchorEl] = useState(null);
 

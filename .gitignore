@@ -9,6 +9,10 @@ backend/venv/
 venv/
 env/
 ENV/
+frontend/.env.local
+backend/.env.local
+
+
 
 # Python Cache
 __pycache__/
