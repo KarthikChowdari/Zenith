@@ -23,6 +23,90 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { SignedIn, SignedOut, UserButton } from '@clerk/clerk-react';
+import { motion } from 'framer-motion';
+
+const FeatureCard = ({ icon, title, description, delay }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay }}
+      viewport={{ once: true }}
+    >
+      <Card
+        sx={{
+          height: '100%',
+          background: 'linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)',
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          '&:hover': {
+            transform: 'translateY(-8px)',
+            boxShadow: '0 12px 32px rgba(33, 150, 243, 0.15)',
+          },
+        }}
+      >
+        <CardContent sx={{ p: 4 }}>
+          <Box
+            sx={{
+              width: 64,
+              height: 64,
+              borderRadius: '16px',
+              background: 'linear-gradient(135deg, #2196f3 0%, #03a9f4 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              mb: 3,
+              boxShadow: '0 8px 24px rgba(33, 150, 243, 0.3)',
+            }}
+          >
+            {React.cloneElement(icon, {
+              sx: { fontSize: 32, color: 'white' },
+            })}
+          </Box>
+          <Typography
+            variant="h6"
+            fontWeight="700"
+            gutterBottom
+            sx={{ color: '#1e293b' }}
+          >
+            {title}
+          </Typography>
+          <Typography variant="body2" sx={{ color: '#64748b', lineHeight: 1.7 }}>
+            {description}
+          </Typography>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+};
+
+const StatItem = ({ value, label, delay }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.8 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.5, delay }}
+      viewport={{ once: true }}
+    >
+      <Box textAlign="center">
+        <Typography
+          variant="h3"
+          fontWeight="800"
+          sx={{
+            background: 'linear-gradient(135deg, #fff 0%, #e3f2fd 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            mb: 1,
+          }}
+        >
+          {value}
+        </Typography>
+        <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.9)' }}>
+          {label}
+        </Typography>
+      </Box>
+    </motion.div>
+  );
+};
 
 const LandingPage = () => {
   const navigate = useNavigate();
