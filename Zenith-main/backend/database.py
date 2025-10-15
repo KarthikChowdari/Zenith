@@ -12,6 +12,7 @@ from datetime import datetime
 import logging
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
+from urllib.parse import quote_plus
 
 # Load environment variables from .env.local
 load_dotenv(".env.local")
@@ -93,16 +94,21 @@ class DatabaseManager:
             db_password = self.supabase_key
             logger.warning("Using anon key as database password. This may not work for all operations.")
         
+        # URL encode the password if it contains special characters
+        encoded_password = quote_plus(db_password)
+        
         # Try different Supabase connection formats
         connection_urls = [
             # Direct connection (most common)
-            f"postgresql://postgres:{db_password}@db.{project_id}.supabase.co:5432/postgres",
+            f"postgresql://postgres:{encoded_password}@db.{project_id}.supabase.co:5432/postgres",
             # Connection pooler format 1
-            f"postgresql://postgres.{project_id}:{db_password}@aws-0-ap-south-1.pooler.supabase.com:6543/postgres",
+            f"postgresql://postgres.{project_id}:{encoded_password}@aws-0-ap-south-1.pooler.supabase.com:6543/postgres",
             # Connection pooler format 2 
-            f"postgresql://postgres:{db_password}@db.{project_id}.supabase.co:6543/postgres",
-            # Alternative region format
-            f"postgresql://postgres.{project_id}:{db_password}@aws-0-us-east-1.pooler.supabase.com:6543/postgres"
+            f"postgresql://postgres:{encoded_password}@db.{project_id}.supabase.co:6543/postgres",
+            # Alternative region format (use correct region)
+            f"postgresql://postgres.{project_id}:{encoded_password}@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres",
+            # Session mode pooler
+            f"postgresql://postgres.{project_id}:{encoded_password}@aws-0-ap-south-1.pooler.supabase.com:5432/postgres"
         ]
         
         # Return the first URL for now, we'll try others in initialize_pool if this fails
