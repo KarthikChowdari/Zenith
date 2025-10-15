@@ -52,6 +52,27 @@ const ScoreSimulator = ({ currentData, currentScore }) => {
     setChartData([]);
   };
   
+  // Helper function to convert employment type to numeric
+  const convertEmploymentType = (empType) => {
+    if (typeof empType === 'number') return empType;
+    const mapping = { 'unemployed': 0, 'self_employed': 1, 'salaried': 2, 'business_owner': 3 };
+    return mapping[empType] || 0;
+  };
+
+  // Helper function to prepare data for ML model
+  const prepareDataForBackend = (data) => {
+    return {
+      loan_repayment_status: data.loan_repayment_status ?? 0,
+      loan_tenure_months: data.loan_tenure_months ?? 12,
+      electricity_bill_paid_on_time: data.electricity_bill_paid_on_time ?? 0,
+      mobile_recharge_frequency: data.mobile_recharge_frequency ?? 1,
+      is_high_need: data.is_high_need ? 1 : 0,
+      age: data.age ?? 30,
+      monthly_income: data.monthly_income ?? 0,
+      employment_type: convertEmploymentType(data.employment_type)
+    };
+  };
+
   // Handle simulation
   const handleSimulate = async () => {
     if (!currentData || Object.keys(hypotheticalChanges).length === 0) {
@@ -63,13 +84,26 @@ const ScoreSimulator = ({ currentData, currentScore }) => {
     setError(null);
     
     try {
-      // Debug: Log the data being sent to backend
-      console.log('Sending to backend:', {
-        current_data: currentData,
-        hypothetical_changes: hypotheticalChanges
+      // Prepare data for backend (convert employment_type string to number, etc.)
+      const preparedCurrentData = prepareDataForBackend(currentData);
+      const preparedChanges = {};
+      
+      // Only include changed values that are different from current
+      Object.keys(hypotheticalChanges).forEach(key => {
+        if (key === 'employment_type') {
+          preparedChanges[key] = convertEmploymentType(hypotheticalChanges[key]);
+        } else {
+          preparedChanges[key] = hypotheticalChanges[key];
+        }
       });
       
-      const result = await simulateScore(currentData, hypotheticalChanges);
+      // Debug: Log the data being sent to backend
+      console.log('Sending to backend:', {
+        current_data: preparedCurrentData,
+        hypothetical_changes: preparedChanges
+      });
+      
+      const result = await simulateScore(preparedCurrentData, preparedChanges);
       
       console.log('Backend simulation result:', result);
       

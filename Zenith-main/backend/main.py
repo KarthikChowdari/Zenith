@@ -1084,10 +1084,14 @@ async def health_check():
 
 if __name__ == "__main__":
     # Run the server
+    import sys
+    # Check if running in a problematic environment
+    reload_enabled = "--no-reload" not in sys.argv
+    
     uvicorn.run(
-        "main:app",
+        app,  # Use app object directly instead of string reference
         host="127.0.0.1",
         port=8000,
-        reload=True,
+        reload=False,  # Disable reload to prevent immediate shutdown
         log_level="info"
     )
